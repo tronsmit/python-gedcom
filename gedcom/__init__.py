@@ -115,7 +115,8 @@ class Gedcom:
             last_element = self.__parse_line(line_number, line.decode('utf-8'), last_element)
             line_number += 1
 
-    def __parse_line(self, line_num, line, last_element):
+    @staticmethod
+    def __parse_line(line_number, line, last_element):
         """Parse a line from a GEDCOM 5.5 formatted document
 
         Each line should have the following (bracketed items optional):
@@ -143,7 +144,7 @@ class Gedcom:
         if regex.match(gedcom_line_regex, line):
             line_parts = regex.match(gedcom_line_regex, line).groups()
         else:
-            error_message = ("Line %d of document violates GEDCOM format" % line_num +
+            error_message = ("Line %d of document violates GEDCOM format" % line_number +
                              "\nSee: http://homepages.rootsweb.ancestry.com/" +
                              "~pmcbride/gedcom/55gctoc.htm")
             raise SyntaxError(error_message)
@@ -156,7 +157,7 @@ class Gedcom:
 
         # Check level: should never be more than one higher than previous line.
         if level > last_element.get_level() + 1:
-            error_message = ("Line %d of document violates GEDCOM format" % line_num +
+            error_message = ("Line %d of document violates GEDCOM format" % line_number +
                              "\nLines must be no more than one level higher than " +
                              "previous line.\nSee: http://homepages.rootsweb." +
                              "ancestry.com/~pmcbride/gedcom/55gctoc.htm")
