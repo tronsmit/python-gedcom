@@ -18,6 +18,20 @@ The module can be installed via [pip](https://pip.pypa.io/).
 Run `pip install python-gedcom` to install or `pip install python-gedcom --upgrade`
 to upgrade to the newest version uploaded to the [PyPI repository](https://pypi.python.org/pypi/python-gedcom).
 
+## Usage
+
+When successfully installed you may import the `gedcom` module and use
+it like so:
+
+```python
+from gedcom import *
+
+file_path = '' # Path to your `.ged` file
+gedcom = Gedcom(file_path)
+
+# Then run methods on `gedcom` ... :)
+```
+
 ## History
 
 This module was originally based on a GEDCOM parser written by 
