@@ -8,6 +8,13 @@ http://homepages.rootsweb.ancestry.com/~pmcbride/gedcom/55gctoc.htm
 > **NOTE**: This module is currently under development. The current development
 > process can be tracked in the ["develop" branch](https://github.com/reynke/python-gedcom/tree/develop).
 
+## Installation
+
+The module can be installed via [pip](https://pip.pypa.io/).
+
+Run `pip install python-gedcom` to install or `pip install python-gedcom --upgrade`
+to upgrade to the newest version uploaded to the [PyPI repository](https://pypi.python.org/pypi/python-gedcom).
+
 ## History
 
 This module was originally based on a GEDCOM parser written by 
