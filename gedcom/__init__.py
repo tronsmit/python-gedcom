@@ -50,14 +50,14 @@ class Gedcom:
         self.__parse(file_path)
 
     def invalidate_cache(self):
-        """Cause element_list() and element_dict() to return updated data
+        """Cause get_element_list() and get_element_dictionary() to return updated data
 
         The update gets deferred until each of the methods actually gets called.
         """
         self.__element_list = []
         self.__element_dictionary = {}
 
-    def element_list(self):
+    def get_element_list(self):
         """Return a list of all the elements in the GEDCOM file
 
         By default elements are in the same order as they appeared in the file.
@@ -74,7 +74,7 @@ class Gedcom:
                 self.__build_list(element, self.__element_list)
         return self.__element_list
 
-    def element_dict(self):
+    def get_element_dictionary(self):
         """Return a dictionary of elements from the GEDCOM file
 
         Only elements identified by a pointer are listed in the dictionary.
@@ -191,7 +191,7 @@ class Gedcom:
         if not individual.is_individual():
             raise ValueError("Operation only valid for elements with INDI tag")
         # Get and analyze families where individual is spouse.
-        families = self.families(individual, "FAMS")
+        families = self.get_families(individual, "FAMS")
         for family in families:
             for family_data in family.get_child_elements():
                 if family_data.get_tag() == "MARR":
@@ -205,13 +205,13 @@ class Gedcom:
                         marriages.append((date, place))
         return marriages
 
-    def marriage_years(self, individual):
+    def get_marriage_years(self, individual):
         """Return list of marriage years (as int) for an individual"""
         dates = []
         if not individual.is_individual():
             raise ValueError("Operation only valid for elements with INDI tag")
         # Get and analyze families where individual is spouse.
-        families = self.families(individual, "FAMS")
+        families = self.get_families(individual, "FAMS")
         for family in families:
             for child in family.get_child_elements():
                 if child.get_tag() == "MARR":
@@ -226,18 +226,18 @@ class Gedcom:
 
     def marriage_year_match(self, individual, year):
         """Check if one of the marriage years of an individual matches the supplied year. Year is an integer."""
-        years = self.marriage_years(individual)
+        years = self.get_marriage_years(individual)
         return year in years
 
-    def marriage_range_match(self, individual, year1, year2):
-        """Check if one of the marriage year of an individual is in a given range. Years are integers."""
-        years = self.marriage_years(individual)
+    def marriage_range_match(self, individual, from_year, to_year):
+        """Check if one of the marriage years of an individual is in a given range. Years are integers."""
+        years = self.get_marriage_years(individual)
         for year in years:
-            if year1 <= year <= year2:
+            if from_year <= year <= to_year:
                 return True
         return False
 
-    def families(self, individual, family_type="FAMS"):
+    def get_families(self, individual, family_type="FAMS"):
         """Return family elements listed for an individual
 
         family_type can be FAMS (families where the individual is a spouse) or
@@ -247,13 +247,13 @@ class Gedcom:
         if not individual.is_individual():
             raise ValueError("Operation only valid for elements with INDI tag.")
         families = []
-        element_dict = self.element_dict()
-        for child in individual.get_child_elements():
-            is_family = (child.get_tag() == family_type and
-                         child.get_value() in element_dict and
-                         element_dict[child.get_value()].is_family())
+        element_dictionary = self.get_element_dictionary()
+        for child_element in individual.get_child_elements():
+            is_family = (child_element.get_tag() == family_type and
+                         child_element.get_value() in element_dictionary and
+                         element_dictionary[child_element.get_value()].is_family())
             if is_family:
-                families.append(element_dict[child.get_value()])
+                families.append(element_dictionary[child_element.get_value()])
         return families
 
     def get_ancestors(self, individual, anc_type="ALL"):
@@ -279,7 +279,7 @@ class Gedcom:
         if not individual.is_individual():
             raise ValueError("Operation only valid for elements with INDI tag.")
         parents = []
-        families = self.families(individual, "FAMC")
+        families = self.get_families(individual, "FAMC")
         for family in families:
             if parent_type == "NAT":
                 for family_member in family.get_child_elements():
@@ -325,7 +325,7 @@ class Gedcom:
         if not family.is_family():
             raise ValueError("Operation only valid for elements with FAM tag.")
         family_members = []
-        element_dict = self.element_dict()
+        element_dictionary = self.get_element_dictionary()
         for child_element in family.get_child_elements():
             # Default is ALL
             is_family = (child_element.get_tag() == "HUSB" or
@@ -340,8 +340,8 @@ class Gedcom:
                 is_family = (child_element.get_tag() == "WIFE")
             elif mem_type == "CHIL":
                 is_family = (child_element.get_tag() == "CHIL")
-            if is_family and child_element.get_value() in element_dict:
-                family_members.append(element_dict[child_element.get_value()])
+            if is_family and child_element.get_value() in element_dictionary:
+                family_members.append(element_dictionary[child_element.get_value()])
         return family_members
 
     # Other methods
