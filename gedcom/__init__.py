@@ -1,5 +1,8 @@
 # Python GEDCOM Parser
 #
+# Licensed under the [GNU General Public License v2](http://www.gnu.org/licenses/gpl-2.0.html)
+#
+# Python GEDCOM
 # Copyright (C) 2018 Nicklas Reincke (contact at reynke.com)
 # Copyright (C) 2016 Andreas Oberritter
 # Copyright (C) 2012 Madeleine Price Ball
@@ -19,8 +22,6 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-#
-# http://www.gnu.org/licenses/gpl-2.0.html
 
 __all__ = ["Gedcom", "Element", "GedcomParseError"]
 
@@ -44,9 +45,9 @@ class Gedcom:
     def __init__(self, file_path):
         """Initialize a GEDCOM data object. You must supply a GEDCOM file"""
         self.__element_list = []
-        self.__element_dict = {}
+        self.__element_dictionary = {}
         self.invalidate_cache()
-        self.__element_top = Element(-1, "", "TOP", "")
+        self.__top_element = Element(-1, "", "TOP", "")
         self.__parse(file_path)
 
     def invalidate_cache(self):
@@ -55,7 +56,7 @@ class Gedcom:
         The update gets deferred until each of the methods actually gets called.
         """
         self.__element_list = []
-        self.__element_dict = {}
+        self.__element_dictionary = {}
 
     def element_list(self):
         """Return a list of all the elements in the GEDCOM file
@@ -84,23 +85,25 @@ class Gedcom:
         database was modified, you should call invalidate_cache() once to let
         this method return updated data.
         """
-        if not self.__element_dict:
-            self.__element_dict = {element.pointer(): element for element in self.records() if element.pointer()}
-        return self.__element_dict
+        if not self.__element_dictionary:
+            self.__element_dictionary = {element.get_pointer(): element for element in self.records() if
+                                         element.get_pointer()}
+
+        return self.__element_dictionary
 
     def root(self):
         """Returns a virtual root element containing all logical records as children
 
         When printed, this element converts to an empty string.
         """
-        return self.__element_top
+        return self.__top_element
 
     def records(self):
         """Return a list of logical records in the GEDCOM file
 
         By default, elements are in the same order as they appeared in the file.
         """
-        return self.root().children()
+        return self.root().get_child_elements()
 
     # Private methods
 
@@ -108,12 +111,12 @@ class Gedcom:
         """Open and parse file path as GEDCOM 5.5 formatted data"""
         gedcom_file = open(file_path, 'rb')
         line_number = 1
-        last_element = self.__element_top
+        last_element = self.__top_element
         for line in gedcom_file:
             last_element = self.__parse_line(line_number, line.decode('utf-8'), last_element)
             line_number += 1
 
-    def __parse_line(self, line_num, line, last_elem):
+    def __parse_line(self, line_num, line, last_element):
         """Parse a line from a GEDCOM 5.5 formatted document
 
         Each line should have the following (bracketed items optional):
@@ -146,7 +149,7 @@ class Gedcom:
         crlf = line_parts[4]
 
         # Check level: should never be more than one higher than previous line.
-        if level > last_elem.level() + 1:
+        if level > last_element.get_level() + 1:
             error_message = ("Line %d of document violates GEDCOM format" % line_num +
                              "\nLines must be no more than one level higher than " +
                              "previous line.\nSee: http://homepages.rootsweb." +
@@ -157,17 +160,20 @@ class Gedcom:
         element = Element(level, pointer, tag, value, crlf, multi_line=False)
 
         # Start with last element as parent, back up if necessary.
-        parent_elem = last_elem
-        while parent_elem.level() > level - 1:
-            parent_elem = parent_elem.parent()
+        parent_element = last_element
+
+        while parent_element.get_level() > level - 1:
+            parent_element = parent_element.parent_element()
+
         # Add child to parent & parent to child.
-        parent_elem.add_child(element)
+        parent_element.add_child_element(element)
+
         return element
 
     def __build_list(self, element, element_list):
         """Recursively add Elements to a list containing elements"""
         element_list.append(element)
-        for child in element.children():
+        for child in element.get_child_elements():
             self.__build_list(child, element_list)
 
     # Methods for analyzing individuals and relationships between individuals
@@ -180,15 +186,15 @@ class Gedcom:
         # Get and analyze families where individual is spouse.
         families = self.families(individual, "FAMS")
         for family in families:
-            for family_data in family.children():
-                if family_data.tag() == "MARR":
-                    for marriage_data in family_data.children():
+            for family_data in family.get_child_elements():
+                if family_data.get_tag() == "MARR":
+                    for marriage_data in family_data.get_child_elements():
                         date = ''
                         place = ''
-                        if marriage_data.tag() == "DATE":
-                            date = marriage_data.value()
-                        if marriage_data.tag() == "PLAC":
-                            place = marriage_data.value()
+                        if marriage_data.get_tag() == "DATE":
+                            date = marriage_data.get_value()
+                        if marriage_data.get_tag() == "PLAC":
+                            place = marriage_data.get_value()
                         marriages.append((date, place))
         return marriages
 
@@ -200,11 +206,11 @@ class Gedcom:
         # Get and analyze families where individual is spouse.
         families = self.families(individual, "FAMS")
         for family in families:
-            for family_data in family.children():
-                if family_data.tag() == "MARR":
-                    for marriage_data in family_data.children():
-                        if marriage_data.tag() == "DATE":
-                            date = marriage_data.value().split()[-1]
+            for child in family.get_child_elements():
+                if child.get_tag() == "MARR":
+                    for childOfChild in child.get_child_elements():
+                        if childOfChild.get_tag() == "DATE":
+                            date = childOfChild.get_value().split()[-1]
                             try:
                                 dates.append(int(date))
                             except ValueError:
@@ -235,12 +241,12 @@ class Gedcom:
             raise ValueError("Operation only valid for elements with INDI tag.")
         families = []
         element_dict = self.element_dict()
-        for child in individual.children():
-            is_family = (child.tag() == family_type and
-                         child.value() in element_dict and
-                         element_dict[child.value()].is_family())
+        for child in individual.get_child_elements():
+            is_family = (child.get_tag() == family_type and
+                         child.get_value() in element_dict and
+                         element_dict[child.get_value()].is_family())
             if is_family:
-                families.append(element_dict[child.value()])
+                families.append(element_dict[child.get_value()])
         return families
 
     def get_ancestors(self, individual, anc_type="ALL"):
@@ -259,9 +265,9 @@ class Gedcom:
 
     def get_parents(self, individual, parent_type="ALL"):
         """Return elements corresponding to parents of an individual
-        
+
         Optional parent_type. Default "ALL" returns all parents. "NAT" can be
-        used to specify only natural (genetic) parents. 
+        used to specify only natural (genetic) parents.
         """
         if not individual.is_individual():
             raise ValueError("Operation only valid for elements with INDI tag.")
@@ -269,32 +275,32 @@ class Gedcom:
         families = self.families(individual, "FAMC")
         for family in families:
             if parent_type == "NAT":
-                for family_member in family.children():
-                    if family_member.tag() == "CHIL" and family_member.value() == individual.pointer():
-                        for child in family_member.children():
-                            if child.value() == "Natural":
-                                if child.tag() == "_MREL":
+                for family_member in family.get_child_elements():
+                    if family_member.get_tag() == "CHIL" and family_member.get_value() == individual.get_pointer():
+                        for child in family_member.get_child_elements():
+                            if child.get_value() == "Natural":
+                                if child.get_tag() == "_MREL":
                                     parents = (parents +
                                                self.get_family_members(family, "WIFE"))
-                                elif child.tag() == "_FREL":
+                                elif child.get_tag() == "_FREL":
                                     parents = (parents +
                                                self.get_family_members(family, "HUSB"))
             else:
                 parents = parents + self.get_family_members(family, "PARENTS")
         return parents
 
-    def find_path_to_anc(self, desc, anc, path=None):
+    def find_path_to_ancestor(self, desc, anc, path=None):
         """Return path from descendant to ancestor"""
         if not desc.is_individual() and anc.is_individual():
             raise ValueError("Operation only valid for elements with IND tag.")
         if not path:
             path = [desc]
-        if path[-1].pointer() == anc.pointer():
+        if path[-1].get_pointer() == anc.get_pointer():
             return path
         else:
             parents = self.get_parents(desc, "NAT")
-            for par in parents:
-                potential_path = self.find_path_to_anc(par, anc, path + [par])
+            for parent in parents:
+                potential_path = self.find_path_to_ancestor(parent, anc, path + [parent])
                 if potential_path:
                     return potential_path
         return None
@@ -313,22 +319,22 @@ class Gedcom:
             raise ValueError("Operation only valid for elements with FAM tag.")
         family_members = []
         element_dict = self.element_dict()
-        for elem in family.children():
+        for child_element in family.get_child_elements():
             # Default is ALL
-            is_family = (elem.tag() == "HUSB" or
-                         elem.tag() == "WIFE" or
-                         elem.tag() == "CHIL")
+            is_family = (child_element.get_tag() == "HUSB" or
+                         child_element.get_tag() == "WIFE" or
+                         child_element.get_tag() == "CHIL")
             if mem_type == "PARENTS":
-                is_family = (elem.tag() == "HUSB" or
-                             elem.tag() == "WIFE")
+                is_family = (child_element.get_tag() == "HUSB" or
+                             child_element.get_tag() == "WIFE")
             elif mem_type == "HUSB":
-                is_family = (elem.tag() == "HUSB")
+                is_family = (child_element.get_tag() == "HUSB")
             elif mem_type == "WIFE":
-                is_family = (elem.tag() == "WIFE")
+                is_family = (child_element.get_tag() == "WIFE")
             elif mem_type == "CHIL":
-                is_family = (elem.tag() == "CHIL")
-            if is_family and elem.value() in element_dict:
-                family_members.append(element_dict[elem.value()])
+                is_family = (child_element.get_tag() == "CHIL")
+            if is_family and child_element.get_value() in element_dict:
+                family_members.append(element_dict[child_element.get_value()])
         return family_members
 
     # Other methods
@@ -378,13 +384,13 @@ class Element:
     is a spouse.  Likewise, an element with a tag of FAMC has a value
     that points to a family record in which the associated person is a
     child.
-    
+
     See a GEDCOM file for examples of tags and their values.
     """
 
     def __init__(self, level, pointer, tag, value, crlf="\n", multi_line=True):
         """Initialize an element
-        
+
         You must include a level, pointer, tag, and value.
         Normally initialized by the GEDCOM parser, not by a user.
         """
@@ -400,19 +406,19 @@ class Element:
         if multi_line:
             self.set_multi_line_value(value)
 
-    def level(self):
+    def get_level(self):
         """Return the level of this element"""
         return self.__level
 
-    def pointer(self):
+    def get_pointer(self):
         """Return the pointer of this element"""
         return self.__pointer
 
-    def tag(self):
+    def get_tag(self):
         """Return the tag of this element"""
         return self.__tag
 
-    def value(self):
+    def get_value(self):
         """Return the value of this element"""
         return self.__value
 
@@ -420,47 +426,45 @@ class Element:
         """Set the value of this element"""
         self.__value = value
 
-    def multi_line_value(self):
+    def get_multi_line_value(self):
         """Return the value of this element including continuations"""
-        result = self.value()
+        result = self.get_value()
         last_crlf = self.__crlf
-        for e in self.children():
-            tag = e.tag()
+        for e in self.get_child_elements():
+            tag = e.get_tag()
             if tag == 'CONC':
-                result += e.value()
+                result += e.get_value()
                 last_crlf = e.__crlf
             elif tag == 'CONT':
-                result += last_crlf + e.value()
+                result += last_crlf + e.get_value()
                 last_crlf = e.__crlf
         return result
 
-    def __avail_chars(self):
-        n = len(self.__unicode__())
-        if n > 255:
-            return 0
-        return 255 - n
+    def __available_characters(self):
+        """Get the number of available characters of the elements original string"""
+        element_characters = len(self.__unicode__())
+        return 0 if element_characters > 255 else 255 - element_characters
 
-    def __line_length(self, string):
-        total = len(string)
-        avail = self.__avail_chars()
-        if total <= avail:
-            return total
-
+    def __line_length(self, line):
+        total_characters = len(line)
+        available_characters = self.__available_characters()
+        if total_characters <= available_characters:
+            return total_characters
         spaces = 0
-        while spaces < avail and string[avail - spaces - 1] == ' ':
+        while spaces < available_characters and line[available_characters - spaces - 1] == ' ':
             spaces = spaces + 1
-        if spaces == avail:
-            return avail
-        return avail - spaces
+        if spaces == available_characters:
+            return available_characters
+        return available_characters - spaces
 
     def __set_bounded_value(self, value):
-        n = self.__line_length(value)
-        self.set_value(value[:n])
-        return n
+        line_length = self.__line_length(value)
+        self.set_value(value[:line_length])
+        return line_length
 
     def __add_bounded_child(self, tag, value):
-        c = self.new_child(tag)
-        return c.__set_bounded_value(value)
+        child = self.new_child_element(tag)
+        return child.__set_bounded_value(value)
 
     def __add_concatenation(self, string):
         index = 0
@@ -471,7 +475,8 @@ class Element:
     def set_multi_line_value(self, value):
         """Set the value of this element, adding continuation lines as necessary"""
         self.set_value('')
-        self.children()[:] = [child for child in self.children() if child.tag() not in ('CONC', 'CONT')]
+        self.get_child_elements()[:] = [child for child in self.get_child_elements() if
+                                        child.get_tag() not in ('CONC', 'CONT')]
 
         lines = value.splitlines()
         if lines:
@@ -483,48 +488,48 @@ class Element:
                 n = self.__add_bounded_child('CONT', line)
                 self.__add_concatenation(line[n:])
 
-    def children(self):
+    def get_child_elements(self):
         """Return the child elements of this element"""
         return self.__children
 
-    def parent(self):
+    def get_parent_element(self):
         """Return the parent element of this element"""
         return self.__parent
 
-    def new_child(self, tag, pointer='', value=''):
+    def new_child_element(self, tag, pointer='', value=''):
         """Create and return a new child element of this element"""
-        child = Element(self.level() + 1, pointer, tag, value, self.__crlf)
-        self.add_child(child)
-        return child
+        child_element = Element(self.get_level() + 1, pointer, tag, value, self.__crlf)
+        self.add_child_element(child_element)
+        return child_element
 
-    def add_child(self, element):
+    def add_child_element(self, element):
         """Add a child element to this element"""
-        self.children().append(element)
-        element.add_parent(self)
+        self.get_child_elements().append(element)
+        element.set_parent_element(self)
 
-    def add_parent(self, element):
+    def set_parent_element(self, element):
         """Add a parent element to this element
 
         There's usually no need to call this method manually,
-        add_child() calls it automatically.
+        add_child_element() calls it automatically.
         """
         self.__parent = element
 
     def is_individual(self):
         """Check if this element is an individual"""
-        return self.tag() == "INDI"
+        return self.get_tag() == "INDI"
 
     def is_family(self):
         """Check if this element is a family"""
-        return self.tag() == "FAM"
+        return self.get_tag() == "FAM"
 
     def is_file(self):
         """Check if this element is a file"""
-        return self.tag() == "FILE"
+        return self.get_tag() == "FILE"
 
     def is_object(self):
         """Check if this element is an object"""
-        return self.tag() == "OBJE"
+        return self.get_tag() == "OBJE"
 
     # criteria matching
 
@@ -597,110 +602,110 @@ class Element:
 
     def surname_match(self, name):
         """Match a string with the surname of an individual"""
-        (first, last) = self.name()
+        (first, last) = self.get_name()
         return last.find(name) >= 0
 
     def given_match(self, name):
         """Match a string with the given names of an individual"""
-        (first, last) = self.name()
+        (first, last) = self.get_name()
         return first.find(name) >= 0
 
     def birth_year_match(self, year):
         """Match the birth year of an individual. Year is an integer"""
-        return self.birth_year() == year
+        return self.get_birth_year() == year
 
-    def birth_range_match(self, year1, year2):
+    def birth_range_match(self, from_year, to_year):
         """Check if the birth year of an individual is in a given range. Years are integers"""
-        year = self.birth_year()
-        if year1 <= year <= year2:
+        birth_year = self.get_birth_year()
+        if from_year <= birth_year <= to_year:
             return True
         return False
 
     def death_year_match(self, year):
         """Match the death year of an individual. Year is an integer"""
-        return self.death_year() == year
+        return self.get_death_year() == year
 
-    def death_range_match(self, year1, year2):
+    def death_range_match(self, from_year, to_year):
         """Check if the death year of an individual is in a given range. Years are integers"""
-        year = self.death_year()
-        if year1 <= year <= year2:
+        death_year = self.get_death_year()
+        if from_year <= death_year <= to_year:
             return True
         return False
 
-    def name(self):
-        """Return a person's names as a tuple: (first,last)"""
+    def get_name(self):
+        """Return a person's names as a tuple: (first, last)"""
         first = ""
         last = ""
         if not self.is_individual():
             return first, last
-        for child in self.children():
-            if child.tag() == "NAME":
+        for child in self.get_child_elements():
+            if child.get_tag() == "NAME":
                 # some older GEDCOM files don't use child tags but instead
                 # place the name in the value of the NAME tag
-                if child.value() != "":
-                    name = child.value().split('/')
+                if child.get_value() != "":
+                    name = child.get_value().split('/')
                     if len(name) > 0:
                         first = name[0].strip()
                         if len(name) > 1:
                             last = name[1].strip()
                 else:
-                    for childOfChild in child.children():
-                        if childOfChild.tag() == "GIVN":
-                            first = childOfChild.value()
-                        if childOfChild.tag() == "SURN":
-                            last = childOfChild.value()
+                    for childOfChild in child.get_child_elements():
+                        if childOfChild.get_tag() == "GIVN":
+                            first = childOfChild.get_value()
+                        if childOfChild.get_tag() == "SURN":
+                            last = childOfChild.get_value()
         return first, last
 
-    def gender(self):
+    def get_gender(self):
         """Return the gender of a person in string format"""
         gender = ""
         if not self.is_individual():
             return gender
-        for child in self.children():
-            if child.tag() == "SEX":
-                gender = child.value()
+        for child in self.get_child_elements():
+            if child.get_tag() == "SEX":
+                gender = child.get_value()
         return gender
 
-    def private(self):
+    def is_private(self):
         """Return if the person is marked private in boolean format"""
         private = False
         if not self.is_individual():
             return private
-        for child in self.children():
-            if child.tag() == "PRIV":
-                private = child.value()
+        for child in self.get_child_elements():
+            if child.get_tag() == "PRIV":
+                private = child.get_value()
                 if private == 'Y':
                     private = True
         return private
 
-    def birth(self):
-        """Return the birth tuple of a person as (date,place)"""
+    def get_birth_data(self):
+        """Return the birth tuple of a person as (date, place, source)"""
         date = ""
         place = ""
         source = ()
         if not self.is_individual():
             return date, place, source
-        for child in self.children():
-            if child.tag() == "BIRT":
-                for childOfChild in child.children():
-                    if childOfChild.tag() == "DATE":
-                        date = childOfChild.value()
-                    if childOfChild.tag() == "PLAC":
-                        place = childOfChild.value()
-                    if childOfChild.tag() == "SOUR":
-                        source = source + (childOfChild.value(),)
+        for child in self.get_child_elements():
+            if child.get_tag() == "BIRT":
+                for childOfChild in child.get_child_elements():
+                    if childOfChild.get_tag() == "DATE":
+                        date = childOfChild.get_value()
+                    if childOfChild.get_tag() == "PLAC":
+                        place = childOfChild.get_value()
+                    if childOfChild.get_tag() == "SOUR":
+                        source = source + (childOfChild.get_value(),)
         return date, place, source
 
-    def birth_year(self):
+    def get_birth_year(self):
         """Return the birth year of a person in integer format"""
         date = ""
         if not self.is_individual():
             return date
-        for child in self.children():
-            if child.tag() == "BIRT":
-                for childOfChild in child.children():
-                    if childOfChild.tag() == "DATE":
-                        date_split = childOfChild.value().split()
+        for child in self.get_child_elements():
+            if child.get_tag() == "BIRT":
+                for childOfChild in child.get_child_elements():
+                    if childOfChild.get_tag() == "DATE":
+                        date_split = childOfChild.get_value().split()
                         date = date_split[len(date_split) - 1]
         if date == "":
             return -1
@@ -709,34 +714,34 @@ class Element:
         except:
             return -1
 
-    def death(self):
-        """Return the death tuple of a person as (date,place)"""
+    def get_death_data(self):
+        """Return the death tuple of a person as (date, place, source)"""
         date = ""
         place = ""
         source = ()
         if not self.is_individual():
             return date, place
-        for child in self.children():
-            if child.tag() == "DEAT":
-                for childOfChild in child.children():
-                    if childOfChild.tag() == "DATE":
-                        date = childOfChild.value()
-                    if childOfChild.tag() == "PLAC":
-                        place = childOfChild.value()
-                    if childOfChild.tag() == "SOUR":
-                        source = source + (childOfChild.value(),)
+        for child in self.get_child_elements():
+            if child.get_tag() == "DEAT":
+                for childOfChild in child.get_child_elements():
+                    if childOfChild.get_tag() == "DATE":
+                        date = childOfChild.get_value()
+                    if childOfChild.get_tag() == "PLAC":
+                        place = childOfChild.get_value()
+                    if childOfChild.get_tag() == "SOUR":
+                        source = source + (childOfChild.get_value(),)
         return date, place, source
 
-    def death_year(self):
+    def get_death_year(self):
         """Return the death year of a person in integer format"""
         date = ""
         if not self.is_individual():
             return date
-        for child in self.children():
-            if child.tag() == "DEAT":
-                for childOfChild in child.children():
-                    if childOfChild.tag() == "DATE":
-                        date_split = childOfChild.value().split()
+        for child in self.get_child_elements():
+            if child.get_tag() == "DEAT":
+                for childOfChild in child.get_child_elements():
+                    if childOfChild.get_tag() == "DATE":
+                        date_split = childOfChild.get_value().split()
                         date = date_split[len(date_split) - 1]
         if date == "":
             return -1
@@ -745,80 +750,80 @@ class Element:
         except:
             return -1
 
-    def burial(self):
-        """Return the burial tuple of a person as (date,place)"""
+    def get_burial(self):
+        """Return the burial tuple of a person as (date, place, source)"""
         date = ""
         place = ""
         source = ()
         if not self.is_individual():
             return date, place
-        for child in self.children():
-            if child.tag() == "BURI":
-                for childOfChild in child.children():
-                    if childOfChild.tag() == "DATE":
-                        date = childOfChild.value()
-                    if childOfChild.tag() == "PLAC":
-                        place = childOfChild.value()
-                    if childOfChild.tag() == "SOUR":
-                        source = source + (childOfChild.value(),)
+        for child in self.get_child_elements():
+            if child.get_tag() == "BURI":
+                for childOfChild in child.get_child_elements():
+                    if childOfChild.get_tag() == "DATE":
+                        date = childOfChild.get_value()
+                    if childOfChild.get_tag() == "PLAC":
+                        place = childOfChild.get_value()
+                    if childOfChild.get_tag() == "SOUR":
+                        source = source + (childOfChild.get_value(),)
         return date, place, source
 
-    def census(self):
+    def get_census(self):
         """Return list of census tuples (date, place) for an individual"""
         census = []
         if not self.is_individual():
             raise ValueError("Operation only valid for elements with INDI tag")
-        for child in self.children():
-            if child.tag() == "CENS":
+        for child in self.get_child_elements():
+            if child.get_tag() == "CENS":
                 date = ''
                 place = ''
                 source = ''
-                for childOfChild in child.children():
-                    if childOfChild.tag() == "DATE":
-                        date = childOfChild.value()
-                    if childOfChild.tag() == "PLAC":
-                        place = childOfChild.value()
-                    if childOfChild.tag() == "SOUR":
-                        source = source + (childOfChild.value(),)
+                for childOfChild in child.get_child_elements():
+                    if childOfChild.get_tag() == "DATE":
+                        date = childOfChild.get_value()
+                    if childOfChild.get_tag() == "PLAC":
+                        place = childOfChild.get_value()
+                    if childOfChild.get_tag() == "SOUR":
+                        source = source + (childOfChild.get_value(),)
                 census.append((date, place, source))
         return census
 
-    def last_updated(self):
+    def get_last_change_date(self):
         """Return the last updated date of a person as (date)"""
         date = ""
         if not self.is_individual():
             return date
-        for child in self.children():
-            if child.tag() == "CHAN":
-                for childOfChild in child.children():
-                    if childOfChild.tag() == "DATE":
-                        date = childOfChild.value()
+        for child in self.get_child_elements():
+            if child.get_tag() == "CHAN":
+                for childOfChild in child.get_child_elements():
+                    if childOfChild.get_tag() == "DATE":
+                        date = childOfChild.get_value()
         return date
 
-    def occupation(self):
+    def get_occupation(self):
         """Return the occupation of a person as (date)"""
         occupation = ""
         if not self.is_individual():
             return occupation
-        for child in self.children():
-            if child.tag() == "OCCU":
-                occupation = child.value()
+        for child in self.get_child_elements():
+            if child.get_tag() == "OCCU":
+                occupation = child.get_value()
         return occupation
 
-    def deceased(self):
+    def is_deceased(self):
         """Check if a person is deceased"""
         if not self.is_individual():
             return False
-        for child in self.children():
-            if child.tag() == "DEAT":
+        for child in self.get_child_elements():
+            if child.get_tag() == "DEAT":
                 return True
         return False
 
     def get_individual(self):
         """Return this element and all of its sub-elements"""
         result = self.__unicode__()
-        for child in self.children():
-            result += child.get_individual()
+        for child_element in self.get_child_elements():
+            result += child_element.get_individual()
         return result
 
     def __str__(self):
@@ -829,13 +834,13 @@ class Element:
 
     def __unicode__(self):
         """Format this element as its original string"""
-        if self.level() < 0:
+        if self.get_level() < 0:
             return ''
-        result = str(self.level())
-        if self.pointer() != "":
-            result += ' ' + self.pointer()
-        result += ' ' + self.tag()
-        if self.value() != "":
-            result += ' ' + self.value()
+        result = str(self.get_level())
+        if self.get_pointer() != "":
+            result += ' ' + self.get_pointer()
+        result += ' ' + self.get_tag()
+        if self.get_value() != "":
+            result += ' ' + self.get_value()
         result += self.__crlf
         return result
