@@ -1,6 +1,7 @@
 # Python GEDCOM Parser
 
 ![](https://img.shields.io/badge/GEDCOM%20format%20version-5.5-yellowgreen.svg)
+![](https://img.shields.io/badge/Python%20version-2%20and%203-yellowgreen.svg)
 
 A Python module for parsing, analyzing, and manipulating GEDCOM files.
 
