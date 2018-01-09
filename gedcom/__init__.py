@@ -163,7 +163,7 @@ class Gedcom:
         parent_element = last_element
 
         while parent_element.get_level() > level - 1:
-            parent_element = parent_element.parent_element()
+            parent_element = parent_element.get_parent_element()
 
         # Add child to parent & parent to child.
         parent_element.add_child_element(element)
