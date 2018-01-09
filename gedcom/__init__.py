@@ -66,11 +66,11 @@ class Gedcom:
         was modified, you should call invalidate_cache() once to let this
         method return updated data.
 
-        Consider using root() or records() to access the hierarchical GEDCOM
+        Consider using get_root_element() or get_root_child_elements() to access the hierarchical GEDCOM
         tree, unless you rarely modify the database.
         """
         if not self.__element_list:
-            for element in self.records():
+            for element in self.get_root_child_elements():
                 self.__build_list(element, self.__element_list)
         return self.__element_list
 
@@ -85,24 +85,24 @@ class Gedcom:
         this method return updated data.
         """
         if not self.__element_dictionary:
-            self.__element_dictionary = {element.get_pointer(): element for element in self.records() if
+            self.__element_dictionary = {element.get_pointer(): element for element in self.get_root_child_elements() if
                                          element.get_pointer()}
 
         return self.__element_dictionary
 
-    def root(self):
+    def get_root_element(self):
         """Returns a virtual root element containing all logical records as children
 
         When printed, this element converts to an empty string.
         """
         return self.__top_element
 
-    def records(self):
+    def get_root_child_elements(self):
         """Return a list of logical records in the GEDCOM file
 
         By default, elements are in the same order as they appeared in the file.
         """
-        return self.root().get_child_elements()
+        return self.get_root_element().get_child_elements()
 
     # Private methods
 
@@ -354,9 +354,9 @@ class Gedcom:
     def save_gedcom(self, open_file):
         """Save GEDCOM data to a file"""
         if version_info[0] >= 3:
-            open_file.write(self.root().get_individual())
+            open_file.write(self.get_root_element().get_individual())
         else:
-            open_file.write(self.root().get_individual().encode('utf-8'))
+            open_file.write(self.get_root_element().get_individual().encode('utf-8'))
 
 
 class GedcomParseError(Exception):
