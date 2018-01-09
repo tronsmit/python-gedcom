@@ -1,9 +1,11 @@
-# Python GEDCOM
+# Python GEDCOM Parser
 
-A python module for parsing, analyzing, and manipulating GEDCOM files.
+![](https://img.shields.io/badge/GEDCOM%20format%20version-5.5-yellowgreen.svg)
 
-GEDCOM files contain ancestry data, the GEDCOM 5.5 format is detailed here:
-http://homepages.rootsweb.ancestry.com/~pmcbride/gedcom/55gctoc.htm
+A Python module for parsing, analyzing, and manipulating GEDCOM files.
+
+GEDCOM files contain ancestry data. The parser is currently supporting
+the GEDCOM 5.5 format which is detailed here: http://homepages.rootsweb.ancestry.com/~pmcbride/gedcom/55gctoc.htm
 
 > **NOTE**: This module is currently under development. The current development
 > process can be tracked in the ["develop" branch](https://github.com/reynke/python-gedcom/tree/develop).
@@ -26,7 +28,7 @@ was licensed under the GPL v2 and then continued by
 
 Licensed under the [GNU General Public License v2](http://www.gnu.org/licenses/gpl-2.0.html)
 
-**Python GEDCOM**
+**Python GEDCOM Parser**
 <br>Copyright (C) 2018 Nicklas Reincke (contact at reynke.com)
 <br>Copyright (C) 2016 Andreas Oberritter
 <br>Copyright (C) 2012 Madeleine Price Ball
