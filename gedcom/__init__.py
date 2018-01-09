@@ -121,20 +121,27 @@ class Gedcom:
         Each line should have the following (bracketed items optional):
         level + ' ' + [pointer + ' ' +] tag + [' ' + line_value]
         """
-        ged_line_regex = (
-            # Level must start with nonnegative int, no leading zeros.
-                '^(0|[1-9]+[0-9]*) ' +
-                # Pointer optional, if it exists it must be flanked by '@'
-                '(@[^@]+@ |)' +
-                # Tag must be alphanumeric string
-                '([A-Za-z0-9_]+)' +
-                # Value optional, consists of anything after a space to end of line
-                '( [^\n\r]*|)' +
-                # End of line defined by \n or \r
-                '([\r\n]{1,2})'
-        )
-        if regex.match(ged_line_regex, line):
-            line_parts = regex.match(ged_line_regex, line).groups()
+
+        # Level must start with non-negative int, no leading zeros.
+        level_regex = '^(0|[1-9]+[0-9]*) '
+
+        # Pointer optional, if it exists it must be flanked by `@`
+        pointer_regex = '(@[^@]+@ |)'
+
+        # Tag must be alphanumeric string
+        tag_regex = '([A-Za-z0-9_]+)'
+
+        # Value optional, consists of anything after a space to end of line
+        value_regex = '( [^\n\r]*|)'
+
+        # End of line defined by `\n` or `\r`
+        end_of_line_regex = '([\r\n]{1,2})'
+
+        # Complete regex
+        gedcom_line_regex = level_regex + pointer_regex + tag_regex + value_regex + end_of_line_regex
+
+        if regex.match(gedcom_line_regex, line):
+            line_parts = regex.match(gedcom_line_regex, line).groups()
         else:
             error_message = ("Line %d of document violates GEDCOM format" % line_num +
                              "\nSee: http://homepages.rootsweb.ancestry.com/" +
