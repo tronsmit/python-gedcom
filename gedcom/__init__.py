@@ -28,6 +28,103 @@ from sys import version_info
 
 __all__ = ["Gedcom", "Element", "GedcomParseError"]
 
+# Relationship to a mother.
+GEDCOM_PROGRAM_DEFINED_TAG_MREL = "_MREL"
+
+# Relationship to a father.
+GEDCOM_PROGRAM_DEFINED_TAG_FREL = "_FREL"
+
+# The event of entering into life.
+GEDCOM_TAG_BIRTH = "BIRT"
+
+# The event of the proper disposing of the mortal remains of a deceased person.
+GEDCOM_TAG_BURIAL = "BURI"
+
+# The event of the periodic count of the population for a designated locality, such as a national or state Census.
+GEDCOM_TAG_CENSUS = "CENS"
+
+# Indicates a change, correction, or modification. Typically used in connection
+# with a DATE to specify when a change in information occurred.
+GEDCOM_TAG_CHANGE = "CHAN"
+
+# The natural, adopted, or sealed (LDS) child of a father and a mother.
+GEDCOM_TAG_CHILD = "CHIL"
+
+# An indicator that additional data belongs to the superior value. The information from the CONC value is to be
+# connected to the value of the superior preceding line without a space and without a carriage return and/or
+# new line character. Values that are split for a CONC tag must always be split at a non-space. If the value is
+# split on a space the space will be lost when concatenation takes place. This is because of the treatment that
+# spaces get as a GEDCOM delimiter, many GEDCOM values are trimmed of trailing spaces and some systems look for
+# the first non-space starting after the tag to determine the beginning of the value.
+GEDCOM_TAG_CONCATENATION = "CONC"
+
+# An indicator that additional data belongs to the superior value. The information from the CONT value is to be
+# connected to the value of the superior preceding line with a carriage return and/or new line character.
+# Leading spaces could be important to the formatting of the resultant text. When importing values from CONT lines
+# the reader should assume only one delimiter character following the CONT tag. Assume that the rest of the leading
+# spaces are to be a part of the value.
+GEDCOM_TAG_CONTINUED = "CONT"
+
+# The time of an event in a calendar format.
+GEDCOM_TAG_DATE = "DATE"
+
+# The event when mortal life terminates.
+GEDCOM_TAG_DEATH = "DEAT"
+
+# Identifies a legal, common law, or other customary relationship of man and woman and their children,
+# if any, or a family created by virtue of the birth of a child to its biological father and mother.
+GEDCOM_TAG_FAMILY = "FAM"
+
+# Identifies the family in which an individual appears as a child.
+GEDCOM_TAG_FAMILY_CHILD = "FAMC"
+
+# Identifies the family in which an individual appears as a spouse.
+GEDCOM_TAG_FAMILY_SPOUSE = "FAMS"
+
+# An information storage place that is ordered and arranged for preservation and reference.
+GEDCOM_TAG_FILE = "FILE"
+
+# A given or earned name used for official identification of a person.
+GEDCOM_TAG_GIVEN_NAME = "GIVN"
+
+# An individual in the family role of a married man or father.
+GEDCOM_TAG_HUSBAND = "HUSB"
+
+# A person.
+GEDCOM_TAG_INDIVIDUAL = "INDI"
+
+# A legal, common-law, or customary event of creating a family unit of a man and a woman as husband and wife.
+GEDCOM_TAG_MARRIAGE = "MARR"
+
+# A word or combination of words used to help identify an individual, title, or other item.
+# More than one NAME line should be used for people who were known by multiple names.
+GEDCOM_TAG_NAME = "NAME"
+
+# Pertaining to a grouping of attributes used in describing something. Usually referring to the data required
+# to represent a multimedia object, such an audio recording, a photograph of a person, or an image of a document.
+GEDCOM_TAG_OBJECT = "OBJE"
+
+# The type of work or profession of an individual.
+GEDCOM_TAG_OCCUPATION = "OCCU"
+
+# A jurisdictional name to identify the place or location of an event.
+GEDCOM_TAG_PLACE = "PLAC"
+
+# Flag for private address or event.
+GEDCOM_TAG_PRIVATE = "PRIV"
+
+# Indicates the sex of an individual--male or female.
+GEDCOM_TAG_SEX = "SEX"
+
+# The initial or original material from which information was obtained.
+GEDCOM_TAG_SOURCE = "SOUR"
+
+# A family name passed on or used by members of a family.
+GEDCOM_TAG_SURNAME = "SURN"
+
+# An individual in the role as a mother and/or married woman.
+GEDCOM_TAG_WIFE = "WIFE"
+
 
 class Gedcom:
     """Parses and manipulates GEDCOM 5.5 format data
@@ -189,18 +286,18 @@ class Gedcom:
         """Return list of marriage tuples (date, place) for an individual"""
         marriages = []
         if not individual.is_individual():
-            raise ValueError("Operation only valid for elements with INDI tag")
+            raise ValueError("Operation only valid for elements with %s tag" % GEDCOM_TAG_INDIVIDUAL)
         # Get and analyze families where individual is spouse.
-        families = self.get_families(individual, "FAMS")
+        families = self.get_families(individual, GEDCOM_TAG_FAMILY_SPOUSE)
         for family in families:
             for family_data in family.get_child_elements():
-                if family_data.get_tag() == "MARR":
+                if family_data.get_tag() == GEDCOM_TAG_MARRIAGE:
                     for marriage_data in family_data.get_child_elements():
                         date = ''
                         place = ''
-                        if marriage_data.get_tag() == "DATE":
+                        if marriage_data.get_tag() == GEDCOM_TAG_DATE:
                             date = marriage_data.get_value()
-                        if marriage_data.get_tag() == "PLAC":
+                        if marriage_data.get_tag() == GEDCOM_TAG_PLACE:
                             place = marriage_data.get_value()
                         marriages.append((date, place))
         return marriages
@@ -209,14 +306,14 @@ class Gedcom:
         """Return list of marriage years (as int) for an individual"""
         dates = []
         if not individual.is_individual():
-            raise ValueError("Operation only valid for elements with INDI tag")
+            raise ValueError("Operation only valid for elements with %s tag" % GEDCOM_TAG_INDIVIDUAL)
         # Get and analyze families where individual is spouse.
-        families = self.get_families(individual, "FAMS")
+        families = self.get_families(individual, GEDCOM_TAG_FAMILY_SPOUSE)
         for family in families:
             for child in family.get_child_elements():
-                if child.get_tag() == "MARR":
+                if child.get_tag() == GEDCOM_TAG_MARRIAGE:
                     for childOfChild in child.get_child_elements():
-                        if childOfChild.get_tag() == "DATE":
+                        if childOfChild.get_tag() == GEDCOM_TAG_DATE:
                             date = childOfChild.get_value().split()[-1]
                             try:
                                 dates.append(int(date))
@@ -237,15 +334,15 @@ class Gedcom:
                 return True
         return False
 
-    def get_families(self, individual, family_type="FAMS"):
+    def get_families(self, individual, family_type=GEDCOM_TAG_FAMILY_SPOUSE):
         """Return family elements listed for an individual
 
-        family_type can be FAMS (families where the individual is a spouse) or
-        FAMC (families where the individual is a child). If a value is not
-        provided, FAMS is default value.
+        family_type can be `TAG_FAMILY_SPOUSE` (families where the individual is a spouse) or
+        `TAG_FAMILY_CHILD` (families where the individual is a child). If a value is not
+        provided, `TAG_FAMILY_SPOUSE` is default value.
         """
         if not individual.is_individual():
-            raise ValueError("Operation only valid for elements with INDI tag.")
+            raise ValueError("Operation only valid for elements with %s tag." % GEDCOM_TAG_INDIVIDUAL)
         families = []
         element_dictionary = self.get_element_dictionary()
         for child_element in individual.get_child_elements():
@@ -263,7 +360,7 @@ class Gedcom:
         used to specify only natural (genetic) ancestors.
         """
         if not individual.is_individual():
-            raise ValueError("Operation only valid for elements with INDI tag.")
+            raise ValueError("Operation only valid for elements with %s tag." % GEDCOM_TAG_INDIVIDUAL)
         parents = self.get_parents(individual, anc_type)
         ancestors = parents
         for parent in parents:
@@ -277,21 +374,21 @@ class Gedcom:
         used to specify only natural (genetic) parents.
         """
         if not individual.is_individual():
-            raise ValueError("Operation only valid for elements with INDI tag.")
+            raise ValueError("Operation only valid for elements with %s tag." % GEDCOM_TAG_INDIVIDUAL)
         parents = []
-        families = self.get_families(individual, "FAMC")
+        families = self.get_families(individual, GEDCOM_TAG_FAMILY_CHILD)
         for family in families:
             if parent_type == "NAT":
                 for family_member in family.get_child_elements():
-                    if family_member.get_tag() == "CHIL" and family_member.get_value() == individual.get_pointer():
+                    if family_member.get_tag() == GEDCOM_TAG_CHILD and family_member.get_value() == individual.get_pointer():
                         for child in family_member.get_child_elements():
                             if child.get_value() == "Natural":
-                                if child.get_tag() == "_MREL":
+                                if child.get_tag() == GEDCOM_PROGRAM_DEFINED_TAG_MREL:
                                     parents = (parents +
-                                               self.get_family_members(family, "WIFE"))
-                                elif child.get_tag() == "_FREL":
+                                               self.get_family_members(family, GEDCOM_TAG_WIFE))
+                                elif child.get_tag() == GEDCOM_PROGRAM_DEFINED_TAG_FREL:
                                     parents = (parents +
-                                               self.get_family_members(family, "HUSB"))
+                                               self.get_family_members(family, GEDCOM_TAG_HUSBAND))
             else:
                 parents = parents + self.get_family_members(family, "PARENTS")
         return parents
@@ -299,7 +396,7 @@ class Gedcom:
     def find_path_to_ancestor(self, desc, anc, path=None):
         """Return path from descendant to ancestor"""
         if not desc.is_individual() and anc.is_individual():
-            raise ValueError("Operation only valid for elements with IND tag.")
+            raise ValueError("Operation only valid for elements with %s tag." % GEDCOM_TAG_INDIVIDUAL)
         if not path:
             path = [desc]
         if path[-1].get_pointer() == anc.get_pointer():
@@ -328,18 +425,18 @@ class Gedcom:
         element_dictionary = self.get_element_dictionary()
         for child_element in family.get_child_elements():
             # Default is ALL
-            is_family = (child_element.get_tag() == "HUSB" or
-                         child_element.get_tag() == "WIFE" or
-                         child_element.get_tag() == "CHIL")
+            is_family = (child_element.get_tag() == GEDCOM_TAG_HUSBAND or
+                         child_element.get_tag() == GEDCOM_TAG_WIFE or
+                         child_element.get_tag() == GEDCOM_TAG_CHILD)
             if mem_type == "PARENTS":
-                is_family = (child_element.get_tag() == "HUSB" or
-                             child_element.get_tag() == "WIFE")
+                is_family = (child_element.get_tag() == GEDCOM_TAG_HUSBAND or
+                             child_element.get_tag() == GEDCOM_TAG_WIFE)
             elif mem_type == "HUSB":
-                is_family = (child_element.get_tag() == "HUSB")
+                is_family = child_element.get_tag() == GEDCOM_TAG_HUSBAND
             elif mem_type == "WIFE":
-                is_family = (child_element.get_tag() == "WIFE")
+                is_family = child_element.get_tag() == GEDCOM_TAG_WIFE
             elif mem_type == "CHIL":
-                is_family = (child_element.get_tag() == "CHIL")
+                is_family = child_element.get_tag() == GEDCOM_TAG_CHILD
             if is_family and child_element.get_value() in element_dictionary:
                 family_members.append(element_dictionary[child_element.get_value()])
         return family_members
@@ -439,10 +536,10 @@ class Element:
         last_crlf = self.__crlf
         for e in self.get_child_elements():
             tag = e.get_tag()
-            if tag == 'CONC':
+            if tag == GEDCOM_TAG_CONCATENATION:
                 result += e.get_value()
                 last_crlf = e.__crlf
-            elif tag == 'CONT':
+            elif tag == GEDCOM_TAG_CONTINUED:
                 result += last_crlf + e.get_value()
                 last_crlf = e.__crlf
         return result
@@ -459,7 +556,7 @@ class Element:
             return total_characters
         spaces = 0
         while spaces < available_characters and line[available_characters - spaces - 1] == ' ':
-            spaces = spaces + 1
+            spaces += 1
         if spaces == available_characters:
             return available_characters
         return available_characters - spaces
@@ -477,13 +574,13 @@ class Element:
         index = 0
         size = len(string)
         while index < size:
-            index = index + self.__add_bounded_child('CONC', string[index:])
+            index += self.__add_bounded_child(GEDCOM_TAG_CONCATENATION, string[index:])
 
     def set_multi_line_value(self, value):
         """Set the value of this element, adding continuation lines as necessary"""
         self.set_value('')
         self.get_child_elements()[:] = [child for child in self.get_child_elements() if
-                                        child.get_tag() not in ('CONC', 'CONT')]
+                                        child.get_tag() not in (GEDCOM_TAG_CONCATENATION, GEDCOM_TAG_CONTINUED)]
 
         lines = value.splitlines()
         if lines:
@@ -492,7 +589,7 @@ class Element:
             self.__add_concatenation(line[n:])
 
             for line in lines:
-                n = self.__add_bounded_child('CONT', line)
+                n = self.__add_bounded_child(GEDCOM_TAG_CONTINUED, line)
                 self.__add_concatenation(line[n:])
 
     def get_child_elements(self):
@@ -524,19 +621,19 @@ class Element:
 
     def is_individual(self):
         """Check if this element is an individual"""
-        return self.get_tag() == "INDI"
+        return self.get_tag() == GEDCOM_TAG_INDIVIDUAL
 
     def is_family(self):
         """Check if this element is a family"""
-        return self.get_tag() == "FAM"
+        return self.get_tag() == GEDCOM_TAG_FAMILY
 
     def is_file(self):
         """Check if this element is a file"""
-        return self.get_tag() == "FILE"
+        return self.get_tag() == GEDCOM_TAG_FILE
 
     def is_object(self):
         """Check if this element is an object"""
-        return self.get_tag() == "OBJE"
+        return self.get_tag() == GEDCOM_TAG_OBJECT
 
     # criteria matching
 
@@ -646,7 +743,7 @@ class Element:
         if not self.is_individual():
             return first, last
         for child in self.get_child_elements():
-            if child.get_tag() == "NAME":
+            if child.get_tag() == GEDCOM_TAG_NAME:
                 # some older GEDCOM files don't use child tags but instead
                 # place the name in the value of the NAME tag
                 if child.get_value() != "":
@@ -657,9 +754,9 @@ class Element:
                             last = name[1].strip()
                 else:
                     for childOfChild in child.get_child_elements():
-                        if childOfChild.get_tag() == "GIVN":
+                        if childOfChild.get_tag() == GEDCOM_TAG_GIVEN_NAME:
                             first = childOfChild.get_value()
-                        if childOfChild.get_tag() == "SURN":
+                        if childOfChild.get_tag() == GEDCOM_TAG_SURNAME:
                             last = childOfChild.get_value()
         return first, last
 
@@ -669,7 +766,7 @@ class Element:
         if not self.is_individual():
             return gender
         for child in self.get_child_elements():
-            if child.get_tag() == "SEX":
+            if child.get_tag() == GEDCOM_TAG_SEX:
                 gender = child.get_value()
         return gender
 
@@ -679,29 +776,29 @@ class Element:
         if not self.is_individual():
             return private
         for child in self.get_child_elements():
-            if child.get_tag() == "PRIV":
+            if child.get_tag() == GEDCOM_TAG_PRIVATE:
                 private = child.get_value()
                 if private == 'Y':
                     private = True
         return private
 
     def get_birth_data(self):
-        """Return the birth tuple of a person as (date, place, source)"""
+        """Return the birth tuple of a person as (date, place, sources)"""
         date = ""
         place = ""
-        source = ()
+        sources = []
         if not self.is_individual():
-            return date, place, source
+            return date, place, sources
         for child in self.get_child_elements():
-            if child.get_tag() == "BIRT":
+            if child.get_tag() == GEDCOM_TAG_BIRTH:
                 for childOfChild in child.get_child_elements():
-                    if childOfChild.get_tag() == "DATE":
+                    if childOfChild.get_tag() == GEDCOM_TAG_DATE:
                         date = childOfChild.get_value()
-                    if childOfChild.get_tag() == "PLAC":
+                    if childOfChild.get_tag() == GEDCOM_TAG_PLACE:
                         place = childOfChild.get_value()
-                    if childOfChild.get_tag() == "SOUR":
-                        source = source + (childOfChild.get_value(),)
-        return date, place, source
+                    if childOfChild.get_tag() == GEDCOM_TAG_SOURCE:
+                        sources.append(childOfChild.get_value())
+        return date, place, sources
 
     def get_birth_year(self):
         """Return the birth year of a person in integer format"""
@@ -709,9 +806,9 @@ class Element:
         if not self.is_individual():
             return date
         for child in self.get_child_elements():
-            if child.get_tag() == "BIRT":
+            if child.get_tag() == GEDCOM_TAG_BIRTH:
                 for childOfChild in child.get_child_elements():
-                    if childOfChild.get_tag() == "DATE":
+                    if childOfChild.get_tag() == GEDCOM_TAG_DATE:
                         date_split = childOfChild.get_value().split()
                         date = date_split[len(date_split) - 1]
         if date == "":
@@ -722,22 +819,22 @@ class Element:
             return -1
 
     def get_death_data(self):
-        """Return the death tuple of a person as (date, place, source)"""
+        """Return the death tuple of a person as (date, place, sources)"""
         date = ""
         place = ""
-        source = ()
+        sources = []
         if not self.is_individual():
             return date, place
         for child in self.get_child_elements():
-            if child.get_tag() == "DEAT":
+            if child.get_tag() == GEDCOM_TAG_DEATH:
                 for childOfChild in child.get_child_elements():
-                    if childOfChild.get_tag() == "DATE":
+                    if childOfChild.get_tag() == GEDCOM_TAG_DATE:
                         date = childOfChild.get_value()
-                    if childOfChild.get_tag() == "PLAC":
+                    if childOfChild.get_tag() == GEDCOM_TAG_PLACE:
                         place = childOfChild.get_value()
-                    if childOfChild.get_tag() == "SOUR":
-                        source = source + (childOfChild.get_value(),)
-        return date, place, source
+                    if childOfChild.get_tag() == GEDCOM_TAG_SOURCE:
+                        sources.append(childOfChild.get_value())
+        return date, place, sources
 
     def get_death_year(self):
         """Return the death year of a person in integer format"""
@@ -745,9 +842,9 @@ class Element:
         if not self.is_individual():
             return date
         for child in self.get_child_elements():
-            if child.get_tag() == "DEAT":
+            if child.get_tag() == GEDCOM_TAG_DEATH:
                 for childOfChild in child.get_child_elements():
-                    if childOfChild.get_tag() == "DATE":
+                    if childOfChild.get_tag() == GEDCOM_TAG_DATE:
                         date_split = childOfChild.get_value().split()
                         date = date_split[len(date_split) - 1]
         if date == "":
@@ -758,41 +855,41 @@ class Element:
             return -1
 
     def get_burial(self):
-        """Return the burial tuple of a person as (date, place, source)"""
+        """Return the burial tuple of a person as (date, place, sources)"""
         date = ""
         place = ""
-        source = ()
+        sources = []
         if not self.is_individual():
             return date, place
         for child in self.get_child_elements():
-            if child.get_tag() == "BURI":
+            if child.get_tag() == GEDCOM_TAG_BURIAL:
                 for childOfChild in child.get_child_elements():
-                    if childOfChild.get_tag() == "DATE":
+                    if childOfChild.get_tag() == GEDCOM_TAG_DATE:
                         date = childOfChild.get_value()
-                    if childOfChild.get_tag() == "PLAC":
+                    if childOfChild.get_tag() == GEDCOM_TAG_PLACE:
                         place = childOfChild.get_value()
-                    if childOfChild.get_tag() == "SOUR":
-                        source = source + (childOfChild.get_value(),)
-        return date, place, source
+                    if childOfChild.get_tag() == GEDCOM_TAG_SOURCE:
+                        sources.append(childOfChild.get_value())
+        return date, place, sources
 
     def get_census(self):
-        """Return list of census tuples (date, place) for an individual"""
+        """Return list of census tuples (date, place, sources) for an individual"""
         census = []
         if not self.is_individual():
-            raise ValueError("Operation only valid for elements with INDI tag")
+            raise ValueError("Operation only valid for elements with %s tag" % GEDCOM_TAG_INDIVIDUAL)
         for child in self.get_child_elements():
-            if child.get_tag() == "CENS":
+            if child.get_tag() == GEDCOM_TAG_CENSUS:
                 date = ''
                 place = ''
-                source = ''
+                sources = []
                 for childOfChild in child.get_child_elements():
-                    if childOfChild.get_tag() == "DATE":
+                    if childOfChild.get_tag() == GEDCOM_TAG_DATE:
                         date = childOfChild.get_value()
-                    if childOfChild.get_tag() == "PLAC":
+                    if childOfChild.get_tag() == GEDCOM_TAG_PLACE:
                         place = childOfChild.get_value()
-                    if childOfChild.get_tag() == "SOUR":
-                        source = source + (childOfChild.get_value(),)
-                census.append((date, place, source))
+                    if childOfChild.get_tag() == GEDCOM_TAG_SOURCE:
+                        sources.append(childOfChild.get_value())
+                census.append((date, place, sources))
         return census
 
     def get_last_change_date(self):
@@ -801,9 +898,9 @@ class Element:
         if not self.is_individual():
             return date
         for child in self.get_child_elements():
-            if child.get_tag() == "CHAN":
+            if child.get_tag() == GEDCOM_TAG_CHANGE:
                 for childOfChild in child.get_child_elements():
-                    if childOfChild.get_tag() == "DATE":
+                    if childOfChild.get_tag() == GEDCOM_TAG_DATE:
                         date = childOfChild.get_value()
         return date
 
@@ -813,7 +910,7 @@ class Element:
         if not self.is_individual():
             return occupation
         for child in self.get_child_elements():
-            if child.get_tag() == "OCCU":
+            if child.get_tag() == GEDCOM_TAG_OCCUPATION:
                 occupation = child.get_value()
         return occupation
 
@@ -822,7 +919,7 @@ class Element:
         if not self.is_individual():
             return False
         for child in self.get_child_elements():
-            if child.get_tag() == "DEAT":
+            if child.get_tag() == GEDCOM_TAG_DEATH:
                 return True
         return False
 
