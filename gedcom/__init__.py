@@ -237,14 +237,15 @@ class Gedcom:
 
         # Complete regex
         gedcom_line_regex = level_regex + pointer_regex + tag_regex + value_regex + end_of_line_regex
+        regex_match = regex.match(gedcom_line_regex, line)
 
-        if regex.match(gedcom_line_regex, line):
-            line_parts = regex.match(gedcom_line_regex, line).groups()
-        else:
-            error_message = ("Line %d of document violates GEDCOM format" % line_number +
+        if regex_match is None:
+            error_message = ("Line `%d` of document violates GEDCOM format" % line_number +
                              "\nSee: http://homepages.rootsweb.ancestry.com/" +
                              "~pmcbride/gedcom/55gctoc.htm")
             raise SyntaxError(error_message)
+
+        line_parts = regex_match.groups()
 
         level = int(line_parts[0])
         pointer = line_parts[1].rstrip(' ')
