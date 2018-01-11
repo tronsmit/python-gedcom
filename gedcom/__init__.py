@@ -353,15 +353,15 @@ class Gedcom:
                 families.append(element_dictionary[child_element.get_value()])
         return families
 
-    def get_ancestors(self, individual, anc_type="ALL"):
+    def get_ancestors(self, individual, ancestor_type="ALL"):
         """Return elements corresponding to ancestors of an individual
 
-        Optional anc_type. Default "ALL" returns all ancestors, "NAT" can be
+        Optional `ancestor_type`. Default "ALL" returns all ancestors, "NAT" can be
         used to specify only natural (genetic) ancestors.
         """
         if not individual.is_individual():
             raise ValueError("Operation only valid for elements with %s tag." % GEDCOM_TAG_INDIVIDUAL)
-        parents = self.get_parents(individual, anc_type)
+        parents = self.get_parents(individual, ancestor_type)
         ancestors = []
         ancestors.extend(parents)
         for parent in parents:
@@ -392,26 +392,26 @@ class Gedcom:
                 parents += self.get_family_members(family, "PARENTS")
         return parents
 
-    def find_path_to_ancestor(self, desc, anc, path=None):
+    def find_path_to_ancestor(self, descendant, ancestor, path=None):
         """Return path from descendant to ancestor"""
-        if not desc.is_individual() and anc.is_individual():
+        if not descendant.is_individual() and ancestor.is_individual():
             raise ValueError("Operation only valid for elements with %s tag." % GEDCOM_TAG_INDIVIDUAL)
         if not path:
-            path = [desc]
-        if path[-1].get_pointer() == anc.get_pointer():
+            path = [descendant]
+        if path[-1].get_pointer() == ancestor.get_pointer():
             return path
         else:
-            parents = self.get_parents(desc, "NAT")
+            parents = self.get_parents(descendant, "NAT")
             for parent in parents:
-                potential_path = self.find_path_to_ancestor(parent, anc, path + [parent])
+                potential_path = self.find_path_to_ancestor(parent, ancestor, path + [parent])
                 if potential_path:
                     return potential_path
         return None
 
-    def get_family_members(self, family, mem_type="ALL"):
+    def get_family_members(self, family, members_type="ALL"):
         """Return array of family members: individual, spouse, and children
 
-        Optional argument `mem_type` can be used to return specific subsets.
+        Optional argument `members_type` can be used to return specific subsets.
         "ALL": Default, return all members of the family
         "PARENTS": Return individuals with "HUSB" and "WIFE" tags (parents)
         "HUSB": Return individuals with "HUSB" tags (father)
@@ -427,14 +427,14 @@ class Gedcom:
             is_family = (child_element.get_tag() == GEDCOM_TAG_HUSBAND or
                          child_element.get_tag() == GEDCOM_TAG_WIFE or
                          child_element.get_tag() == GEDCOM_TAG_CHILD)
-            if mem_type == "PARENTS":
+            if members_type == "PARENTS":
                 is_family = (child_element.get_tag() == GEDCOM_TAG_HUSBAND or
                              child_element.get_tag() == GEDCOM_TAG_WIFE)
-            elif mem_type == "HUSB":
+            elif members_type == "HUSB":
                 is_family = child_element.get_tag() == GEDCOM_TAG_HUSBAND
-            elif mem_type == "WIFE":
+            elif members_type == "WIFE":
                 is_family = child_element.get_tag() == GEDCOM_TAG_WIFE
-            elif mem_type == "CHIL":
+            elif members_type == "CHIL":
                 is_family = child_element.get_tag() == GEDCOM_TAG_CHILD
             if is_family and child_element.get_value() in element_dictionary:
                 family_members.append(element_dictionary[child_element.get_value()])
@@ -533,14 +533,14 @@ class Element:
         """Return the value of this element including continuations"""
         result = self.get_value()
         last_crlf = self.__crlf
-        for e in self.get_child_elements():
-            tag = e.get_tag()
+        for element in self.get_child_elements():
+            tag = element.get_tag()
             if tag == GEDCOM_TAG_CONCATENATION:
-                result += e.get_value()
-                last_crlf = e.__crlf
+                result += element.get_value()
+                last_crlf = element.__crlf
             elif tag == GEDCOM_TAG_CONTINUED:
-                result += last_crlf + e.get_value()
-                last_crlf = e.__crlf
+                result += last_crlf + element.get_value()
+                last_crlf = element.__crlf
         return result
 
     def __available_characters(self):
