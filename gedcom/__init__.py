@@ -362,9 +362,10 @@ class Gedcom:
         if not individual.is_individual():
             raise ValueError("Operation only valid for elements with %s tag." % GEDCOM_TAG_INDIVIDUAL)
         parents = self.get_parents(individual, anc_type)
-        ancestors = parents
+        ancestors = []
+        ancestors.extend(parents)
         for parent in parents:
-            ancestors = ancestors + self.get_ancestors(parent)
+            ancestors.extend(self.get_ancestors(parent))
         return ancestors
 
     def get_parents(self, individual, parent_type="ALL"):
@@ -384,13 +385,11 @@ class Gedcom:
                         for child in family_member.get_child_elements():
                             if child.get_value() == "Natural":
                                 if child.get_tag() == GEDCOM_PROGRAM_DEFINED_TAG_MREL:
-                                    parents = (parents +
-                                               self.get_family_members(family, GEDCOM_TAG_WIFE))
+                                    parents += self.get_family_members(family, GEDCOM_TAG_WIFE)
                                 elif child.get_tag() == GEDCOM_PROGRAM_DEFINED_TAG_FREL:
-                                    parents = (parents +
-                                               self.get_family_members(family, GEDCOM_TAG_HUSBAND))
+                                    parents += self.get_family_members(family, GEDCOM_TAG_HUSBAND)
             else:
-                parents = parents + self.get_family_members(family, "PARENTS")
+                parents += self.get_family_members(family, "PARENTS")
         return parents
 
     def find_path_to_ancestor(self, desc, anc, path=None):
