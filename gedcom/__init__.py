@@ -1,8 +1,5 @@
 # Python GEDCOM Parser
 #
-# Licensed under the [GNU General Public License v2](http://www.gnu.org/licenses/gpl-2.0.html)
-#
-# Python GEDCOM
 # Copyright (C) 2018 Nicklas Reincke (contact at reynke.com)
 # Copyright (C) 2016 Andreas Oberritter
 # Copyright (C) 2012 Madeleine Price Ball
@@ -22,6 +19,8 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
 import re as regex
 from sys import version_info
