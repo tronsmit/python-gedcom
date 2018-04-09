@@ -10,8 +10,8 @@ A Python module for parsing, analyzing, and manipulating GEDCOM files.
 GEDCOM files contain ancestry data. The parser is currently supporting
 the GEDCOM 5.5 format which is detailed here: http://homepages.rootsweb.ancestry.com/~pmcbride/gedcom/55gctoc.htm
 
-> **NOTE**: This module is currently under development. The current development
-> process can be tracked in the ["develop" branch](https://github.com/reynke/python-gedcom/tree/develop).
+> **NOTE**: This module is currently under development and **should not be used in production**!
+> The current development process can be tracked in the ["develop" branch](https://github.com/reynke/python-gedcom/tree/develop).
 
 ## Installation
 
