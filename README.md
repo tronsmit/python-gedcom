@@ -1,5 +1,7 @@
 # Python GEDCOM Parser
 
+[![PyPI](https://img.shields.io/pypi/v/python-gedcom.svg)](https://pypi.org/project/python-gedcom/)
+[![GitHub release](https://img.shields.io/github/release/nickreynke/python-gedcom.svg)](https://github.com/nickreynke/python-gedcom)
 ![](https://img.shields.io/badge/GEDCOM%20format%20version-5.5-yellowgreen.svg)
 ![](https://img.shields.io/badge/Python%20version-2%20and%203-yellowgreen.svg)
 
@@ -13,10 +15,13 @@ the GEDCOM 5.5 format which is detailed here: http://homepages.rootsweb.ancestry
 
 ## Installation
 
+> **NOTE**: As of the 26 march of 2018 the beta of the new Python Package
+> Index launched. I recommend reading this: "[All New PyPI is now in beta](https://pyfound.blogspot.de/2018/03/warehouse-all-new-pypi-is-now-in-beta.html)"
+
 The module can be installed via [pip](https://pip.pypa.io/).
 
 Run `pip install python-gedcom` to install or `pip install python-gedcom --upgrade`
-to upgrade to the newest version uploaded to the [PyPI repository](https://pypi.python.org/pypi/python-gedcom).
+to upgrade to the newest version uploaded to the [PyPI repository](https://pypi.org/project/python-gedcom/).
 
 ## Usage
 
@@ -24,7 +29,7 @@ When successfully installed you may import the `gedcom` module and use
 it like so:
 
 ```python
-from gedcom import *
+from gedcom import Gedcom
 
 file_path = '' # Path to your `.ged` file
 gedcom = Gedcom(file_path)
@@ -35,7 +40,7 @@ gedcom = Gedcom(file_path)
 ## History
 
 This module was originally based on a GEDCOM parser written by 
-Daniel Zappala at Brigham Young University (copyright (C) 2005) which
+Daniel Zappala at Brigham Young University (Copyright (C) 2005) which
 was licensed under the GPL v2 and then continued by
 [Mad Price Ball](https://github.com/madprime) in 2012.
 
