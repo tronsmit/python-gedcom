@@ -44,6 +44,22 @@ Daniel Zappala at Brigham Young University (Copyright (C) 2005) which
 was licensed under the GPL v2 and then continued by
 [Mad Price Ball](https://github.com/madprime) in 2012.
 
+## Changelog
+
+**v0.2.0dev**
+
+- Added `develop` branch to track and update current development process
+- Applied PEP 8 Style Guide conventions
+- **Renamed variables and methods** to make their purpose more clear
+- **Outsourced GEDCOM tags to module level**
+- Optimized `README.md` (sections and better description)
+- Added `LICENSE` file
+- Cleaned up and optimized code
+
+**v0.1.1dev**
+
+- initial release; [forked](https://github.com/madprime/python-gedcom)
+
 ## License
 
 Licensed under the [GNU General Public License v2](http://www.gnu.org/licenses/gpl-2.0.html)
