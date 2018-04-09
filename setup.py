@@ -6,7 +6,7 @@ setup(
     packages=['gedcom', ],
     license='GPLv2',
     package_dir={'': '.'},
-    description=open('README.md').readlines()[0].strip(),
+    description='A Python module for parsing, analyzing, and manipulating GEDCOM files.',
     long_description=open('README.md').read(),
     maintainer='Nicklas Reincke',
     maintainer_email='contact@reynke.com',
