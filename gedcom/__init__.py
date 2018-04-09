@@ -144,7 +144,7 @@ class Gedcom:
         self.__element_list = []
         self.__element_dictionary = {}
         self.invalidate_cache()
-        self.__top_element = Element(-1, "", "TOP", "")
+        self.__root_element = Element(-1, "", "ROOT", "")
         self.__parse(file_path)
 
     def invalidate_cache(self):
@@ -200,7 +200,7 @@ class Gedcom:
 
         :rtype: Element
         """
-        return self.__top_element
+        return self.__root_element
 
     def get_root_child_elements(self):
         """Return a list of logical records in the GEDCOM file
@@ -219,7 +219,7 @@ class Gedcom:
         """
         gedcom_file = open(file_path, 'rb')
         line_number = 1
-        last_element = self.__top_element
+        last_element = self.__root_element
         for line in gedcom_file:
             last_element = self.__parse_line(line_number, line.decode('utf-8'), last_element)
             line_number += 1
