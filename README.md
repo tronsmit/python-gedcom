@@ -52,6 +52,7 @@ was licensed under the GPL v2 and then continued by
 - Applied PEP 8 Style Guide conventions
 - **Renamed variables and methods** to make their purpose more clear
 - **Outsourced GEDCOM tags to module level**
+- **Added missing inline documentation**
 - Optimized `README.md` (sections and better description)
 - Added `LICENSE` file
 - Cleaned up and optimized code
