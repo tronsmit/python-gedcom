@@ -10,5 +10,5 @@ setup(
     long_description=open('README.md').read(),
     maintainer='Nicklas Reincke',
     maintainer_email='contact@reynke.com',
-    url='https://github.com/reynke/python-gedcom',
+    url='https://github.com/nickreynke/python-gedcom',
 )
