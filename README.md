@@ -46,6 +46,10 @@ was licensed under the GPL v2 and then continued by
 
 ## Changelog
 
+**v0.2.1dev**
+
+- Changed broken links to GEDCOM format specification ([#2](https://github.com/nickreynke/python-gedcom/issues/2))
+
 **v0.2.0dev**
 
 - Added `develop` branch to track and update current development process
