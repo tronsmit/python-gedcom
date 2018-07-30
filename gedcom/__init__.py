@@ -257,9 +257,8 @@ class Gedcom:
         regex_match = regex.match(gedcom_line_regex, line)
 
         if regex_match is None:
-            error_message = ("Line `%d` of document violates GEDCOM format" % line_number +
-                             "\nSee: http://homepages.rootsweb.ancestry.com/" +
-                             "~pmcbride/gedcom/55gctoc.htm")
+            error_message = ("Line `%d` of document violates GEDCOM format 5.5" % line_number +
+                             "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
             raise SyntaxError(error_message)
 
         line_parts = regex_match.groups()
@@ -272,10 +271,9 @@ class Gedcom:
 
         # Check level: should never be more than one higher than previous line.
         if level > last_element.get_level() + 1:
-            error_message = ("Line %d of document violates GEDCOM format" % line_number +
-                             "\nLines must be no more than one level higher than " +
-                             "previous line.\nSee: http://homepages.rootsweb." +
-                             "ancestry.com/~pmcbride/gedcom/55gctoc.htm")
+            error_message = ("Line %d of document violates GEDCOM format 5.5" % line_number +
+                             "\nLines must be no more than one level higher than previous line." +
+                             "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
             raise SyntaxError(error_message)
 
         # Create element. Store in list and dict, create children and parents.
