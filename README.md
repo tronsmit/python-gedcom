@@ -37,6 +37,13 @@ gedcom = Gedcom(file_path)
 # Then run methods on `gedcom` ... :)
 ```
 
+## Quirk Handling
+
+Some genealogical websites like MyHeritage and Ancestry produce GEDCOM files that are somewhat out of spec.  This module aims to handle these quirks.  Specifically that includes:
+
+- Ignoring BOM control characters
+- Multi-line fields that don't use CONC or CONT
+
 ## History
 
 This module was originally based on a GEDCOM parser written by 
@@ -44,7 +51,13 @@ Daniel Zappala at Brigham Young University (Copyright (C) 2005) which
 was licensed under the GPL v2 and then continued by
 [Mad Price Ball](https://github.com/madprime) in 2012.
 
+Further updates by [Nicklas Reincke](https://github.com/nickreynke) and [Damon Brodie](https://github.com/nomadyow) in 2018.
+
 ## Changelog
+
+**v0.2.2dev**
+
+- Support BOM control characters
 
 **v0.2.1dev**
 
