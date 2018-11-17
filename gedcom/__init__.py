@@ -258,21 +258,34 @@ class Gedcom:
         regex_match = regex.match(gedcom_line_regex, line)
 
         if regex_match is None:
-            # Sometimes a gedcom has a text field with a CR.  This creates a line without the standard
-            # level and pointer.  If this is detected then turn it into a CONC or CONT
-            line_regex = '([^\n\r]*|)'
-            cont_line_regex = line_regex + end_of_line_regex
-            regex_match = regex.match(cont_line_regex, line)
-            line_parts = regex_match.groups()
-            level = last_element.get_level()
-            tag = last_element.get_tag()
-            pointer = None
-            value = line_parts[0][1:]
-            crlf = line_parts[1]
-            if tag != GEDCOM_TAG_CONTINUED and tag != GEDCOM_TAG_CONCATENATION:
-                # Increment level and change this line to a CONC
-                level += 1
-                tag = GEDCOM_TAG_CONCATENATION
+            # Quirk check - see if this is a line without a CRLF (which could be the last line)
+            last_line_regex = level_regex + pointer_regex + tag_regex + value_regex
+            regex_match = regex.match(last_line_regex, line)
+            if regex_match is not None:
+                line_parts = regex_match.groups()
+    
+                level = int(line_parts[0])
+                pointer = line_parts[1].rstrip(' ')
+                tag = line_parts[2]
+                value = line_parts[3][1:]
+                crlf = '\n'
+            else:
+                # Quirck check - Sometimes a gedcom has a text field with a CR.  
+                # This creates a line without the standard level and pointer.  If this is detected 
+                # then turn it into a CONC or CONT
+                line_regex = '([^\n\r]*|)'
+                cont_line_regex = line_regex + end_of_line_regex
+                regex_match = regex.match(cont_line_regex, line)
+                line_parts = regex_match.groups()
+                level = last_element.get_level()
+                tag = last_element.get_tag()
+                pointer = None
+                value = line_parts[0][1:]
+                crlf = line_parts[1]
+                if tag != GEDCOM_TAG_CONTINUED and tag != GEDCOM_TAG_CONCATENATION:
+                    # Increment level and change this line to a CONC
+                    level += 1
+                    tag = GEDCOM_TAG_CONCATENATION
         else:
             line_parts = regex_match.groups()
     
