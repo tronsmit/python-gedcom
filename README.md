@@ -83,6 +83,7 @@ Further updates by [Nicklas Reincke](https://github.com/nickreynke) and [Damon B
 Licensed under the [GNU General Public License v2](http://www.gnu.org/licenses/gpl-2.0.html)
 
 **Python GEDCOM Parser**
+<br>Copyright (C) 2018 Damon Brodie (damon.brodie at gmail.com)
 <br>Copyright (C) 2018 Nicklas Reincke (contact at reynke.com)
 <br>Copyright (C) 2016 Andreas Oberritter
 <br>Copyright (C) 2012 Madeleine Price Ball
