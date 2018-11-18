@@ -94,24 +94,25 @@ get_last_change_date   |||
 get_occupation         |||
 get_individual         |||
 
-### Multiple Record Methods
+### Gedcom operations
 
-These operate on gedcom
-get_root_element
-get_root_child_elements
-get_element_dictionary
-get_element_list
-get_marriages
-find_path_to_ancestors
-get_family_members
-get_parents
-get_ancestors
-get_families
-marriage_range_match
-marriage_year_match
-get_marriage_years
-print_gedcom
-save_gedcom
+Method                  | Parameters | Returns | Description |
+------------------------|------------|---------|-------------|
+get_root_element        ||||
+get_root_child_elements ||||
+get_element_dictionary  ||||
+get_element_list        ||||
+get_marriages           ||||
+find_path_to_ancestors  ||||
+get_family_members      ||||
+get_parents             ||||
+get_ancestors           ||||
+get_families            ||||
+marriage_range_match    ||||
+marriage_year_match     ||||
+get_marriage_years      ||||
+print_gedcom            ||||
+save_gedcom             ||||
 
 
 ## Quirk Handling
