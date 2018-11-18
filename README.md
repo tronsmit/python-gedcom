@@ -35,14 +35,26 @@ file_path = '' # Path to your `.ged` file
 gedcom = Gedcom(file_path)
 ```
 
-Iterate through all records, search last names and print matches
+### GEDCOM Quirks
+
+Large sites like Ancesty and MyHeritage (among others) don't always produce perfectly formatted GEDCOM files.  If you encounter errors in parsing, you might consider disabling strict parsing which will make a best effort to parse file:
+
+
+```python
+from gedcom import Gedcom
+
+file_path = '' # Path to your `.ged` file
+gedcom = Gedcom(file_path, False) # Disable strict parsing
+```
+
+### Iterate through all records, search last names and print matches
 
 ```python
 all_records = gedcom.get_root_child_elements()
 for record in all_records:
     if record.is_individual():
-        (first, last) = record.get_name()
-        if last == 'Brodie':
+        if record.surname_match('Brodie'):
+            (first, last) = record.get_name()
             print(first + " " + last)
 ```
 
