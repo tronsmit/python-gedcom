@@ -33,8 +33,15 @@ from gedcom import Gedcom
 
 file_path = '' # Path to your `.ged` file
 gedcom = Gedcom(file_path)
+```
 
-# Then run methods on `gedcom` ... :)
+#Iterate through all records, print the name of individuals
+
+```python
+all_records = gedcom.get_root_child_elements()
+for record in all_records:
+    if (record.is_individual()):
+        print(record.get_name())
 ```
 
 ## Quirk Handling
