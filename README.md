@@ -48,55 +48,59 @@ for record in all_records:
 
 ## Reference
 
-# Single Record Methods
+### Single Record Methods
 
-Method       | Parameters | Returns | Description
--------------|------------|---------|------------
-is_deceased  | none       | Boolean |
-is_private   | none       | Boolean |
-is_individual| none       | Boolean |
+Method                 | Parameters | Returns | Description
+-----------------------|------------|---------|------------
+get_child_elements     |||
+get_parent_element     |||
+new_child_element      |||
+add_child_element      |||
+set_parent_element     |            |         |
+is_individual          | none       | Boolean |
+is_family              | none       | Boolean |
+is_file                | none       | Boolean |
+is_object              | none       | Boolean |
+is_private             | none       | Boolean |
+is_deceased            | none       | Boolean |
+criteria_match         |||
+surname_match          |||
+given_match            |||
+death_range_match      |||
+death_year_match       |||
+birth_range_match      |||
+birth_year_match       |||
+get_name               |||
+get_gender             |||
+get_birth_data         |||
+get_birth_year         |||
+get_death_data         |||
+get_death_year         |||
+get_burial             |||
+get_census             |||
+get_last_change_date   |||
+get_occupation         |||
+get_individual         |||
 
-
-get_occupation
-get_last_changed_date
-get_census
-get_burial
-get_death_year
-get_death_data
-get_birth_year
-get_birth_data
-get_gender
-get_name
-death_range_match
-death_year_match
-birth_range_match
-birth_year_match
-given_match
-surname_match
-criteria_match
-is_object
-is_file
-is_family
-set_parent_element
-add_child_element
-new_child_element
-get_parent_element
-get_child_elements
-get_family_members
-find_path_to_ancestors
-get_parents
-get_ancestors
-get_families
-marriage_range_match
-marriage_year_match
-get_marriage_years
-get_marriages
+### Multiple Record Methods
 
 These operate on gedcom
 get_root_element
 get_root_child_elements
 get_element_dictionary
 get_element_list
+get_marriages
+find_path_to_ancestors
+get_family_members
+get_parents
+get_ancestors
+get_families
+marriage_range_match
+marriage_year_match
+get_marriage_years
+print_gedcom
+save_gedcom
+
 
 ## Quirk Handling
 
