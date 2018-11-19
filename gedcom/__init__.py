@@ -1,5 +1,6 @@
 # Python GEDCOM Parser
 #
+# Copyright (C) 2018 Damon Brodie (damon.brodie at gmail.com)
 # Copyright (C) 2018 Nicklas Reincke (contact at reynke.com)
 # Copyright (C) 2016 Andreas Oberritter
 # Copyright (C) 2012 Madeleine Price Ball
@@ -137,7 +138,7 @@ class Gedcom:
       - a dict (only elements with pointers, which are the keys)
     """
 
-    def __init__(self, file_path):
+    def __init__(self, file_path, use_strict = True):
         """Initialize a GEDCOM data object. You must supply a GEDCOM file
         :type file_path: str
         """
@@ -145,7 +146,8 @@ class Gedcom:
         self.__element_dictionary = {}
         self.invalidate_cache()
         self.__root_element = Element(-1, "", "ROOT", "")
-        self.__parse(file_path)
+        self.__parse(file_path, use_strict)
+        self.__use_strict = use_strict
 
     def invalidate_cache(self):
         """Cause get_element_list() and get_element_dictionary() to return updated data
@@ -213,7 +215,7 @@ class Gedcom:
 
     # Private methods
 
-    def __parse(self, file_path):
+    def __parse(self, file_path, use_strict = True):
         """Open and parse file path as GEDCOM 5.5 formatted data
         :type file_path: str
         """
@@ -221,11 +223,11 @@ class Gedcom:
         line_number = 1
         last_element = self.__root_element
         for line in gedcom_file:
-            last_element = self.__parse_line(line_number, line.decode('utf-8'), last_element)
+            last_element = self.__parse_line(line_number, line.decode('utf-8-sig'), last_element, use_strict )
             line_number += 1
 
     @staticmethod
-    def __parse_line(line_number, line, last_element):
+    def __parse_line(line_number, line, last_element, use_strict = True):
         """Parse a line from a GEDCOM 5.5 formatted document
 
         Each line should have the following (bracketed items optional):
@@ -257,17 +259,47 @@ class Gedcom:
         regex_match = regex.match(gedcom_line_regex, line)
 
         if regex_match is None:
-            error_message = ("Line `%d` of document violates GEDCOM format 5.5" % line_number +
-                             "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
-            raise SyntaxError(error_message)
-
-        line_parts = regex_match.groups()
-
-        level = int(line_parts[0])
-        pointer = line_parts[1].rstrip(' ')
-        tag = line_parts[2]
-        value = line_parts[3][1:]
-        crlf = line_parts[4]
+            if use_strict:
+                error_message = ("Line %d of document violates GEDCOM format 5.5" % line_number +
+                "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
+                raise SyntaxError(error_message)
+            else:
+                # Quirk check - see if this is a line without a CRLF (which could be the last line)
+                last_line_regex = level_regex + pointer_regex + tag_regex + value_regex
+                regex_match = regex.match(last_line_regex, line)
+                if regex_match is not None:
+                    line_parts = regex_match.groups()
+        
+                    level = int(line_parts[0])
+                    pointer = line_parts[1].rstrip(' ')
+                    tag = line_parts[2]
+                    value = line_parts[3][1:]
+                    crlf = '\n'
+                else:
+                    # Quirk check - Sometimes a gedcom has a text field with a CR.  
+                    # This creates a line without the standard level and pointer.  If this is detected 
+                    # then turn it into a CONC or CONT
+                    line_regex = '([^\n\r]*|)'
+                    cont_line_regex = line_regex + end_of_line_regex
+                    regex_match = regex.match(cont_line_regex, line)
+                    line_parts = regex_match.groups()
+                    level = last_element.get_level()
+                    tag = last_element.get_tag()
+                    pointer = None
+                    value = line_parts[0][1:]
+                    crlf = line_parts[1]
+                    if tag != GEDCOM_TAG_CONTINUED and tag != GEDCOM_TAG_CONCATENATION:
+                        # Increment level and change this line to a CONC
+                        level += 1
+                        tag = GEDCOM_TAG_CONCATENATION
+        else:
+            line_parts = regex_match.groups()
+    
+            level = int(line_parts[0])
+            pointer = line_parts[1].rstrip(' ')
+            tag = line_parts[2]
+            value = line_parts[3][1:]
+            crlf = line_parts[4]
 
         # Check level: should never be more than one higher than previous line.
         if level > last_element.get_level() + 1:

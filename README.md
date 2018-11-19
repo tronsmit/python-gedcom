@@ -33,9 +33,93 @@ from gedcom import Gedcom
 
 file_path = '' # Path to your `.ged` file
 gedcom = Gedcom(file_path)
-
-# Then run methods on `gedcom` ... :)
 ```
+
+### GEDCOM Quirks
+
+Large sites like Ancesty and MyHeritage (among others) don't always produce perfectly formatted GEDCOM files.  If you encounter errors in parsing, you might consider disabling strict parsing which will make a best effort to parse the file:
+
+
+```python
+from gedcom import Gedcom
+
+file_path = '' # Path to your `.ged` file
+gedcom = Gedcom(file_path, False) # Disable strict parsing
+```
+
+Disabling strict parsing will allow the parser to gracefully handle the following quirks:
+
+- Multi-line fields that don't use CONC or CONT
+- Handle the last line not ending in a CRLF
+
+### Iterate through all records, search last names and print matches
+
+```python
+all_records = gedcom.get_root_child_elements()
+for record in all_records:
+    if record.is_individual():
+        if record.surname_match('Brodie'):
+            (first, last) = record.get_name()
+            print(first + " " + last)
+```
+
+## Reference
+
+The Element class contains all the information for a single record in the GEDCOM file, for example and individual.
+
+### Single Record Methods
+
+Method                 | Parameters | Returns | Description
+-----------------------|------------|---------|------------
+get_child_elements     | none          | List of Element | Returns all the child elements of this record
+get_parent_element     | none          | Element | Returns parent Element
+new_child_element      | String tag, String pointer, String value | Element | Create a new Element
+add_child_element      | Element child | Element | Adds the child record
+set_parent_element     | Element parent| none | Not normally required to be called (add_child_element calls this automatically
+is_individual          | none          | Boolean | Is this record of a person
+is_family              | none          | Boolean | 
+is_file                | none          | Boolean |
+is_object              | none          | Boolean |
+is_private             | none          | Boolean | Returns True if the record is marked Private
+is_deceased            | none          | Boolean | Returns True if the individual is marked deceased
+criteria_match         | colon separated string "surname=[name]:name=[name]:birth][year]:birth_range=[year-to-year]:death=[year]:death_range[year-to-year]"| Boolean | Returns True if the criteria matches
+surname_match          | String | Boolean | Returns True if substring matches
+given_match            | String | Boolean | Returns True if subscring matches
+death_range_match      | Int from, Int to | Boolean | Returns True if Death Year is in the supplied range
+death_year_match       | Int | Boolean | Returns True if Death Year equals parameter
+birth_range_match      | Int from, Int to | Boolean | Returns True if Birth Year is in the supplied range
+birth_year_match       | Int | Boolean | Returns True if Birth Year equals parameter
+get_name               | none | (String given, String surname) | Returns the Given name(s) and Surname in a tuple
+get_gender             | none | String | Returns individual's gender
+get_birth_data         | none | (String date, String place, Array sources) | Returns a tuple of the birth data
+get_birth_year         | none | Int | Returns the Birth Year
+get_death_data         | none | (String date, String place, Array sources) | Returns a tuple of the death data
+get_death_year         | none | Int | Returns the Death Year
+get_burial         | none | (String date, String place, Array sources) | Returns a tuple of the burial data
+get_census         | none | List [String date, String place, Array sources] | Returns a List of tuple of the census data
+get_last_change_date   | none | String | Returns the date of the last update to this individual
+get_occupation         | none | String | Returns the individual's occupation
+get_individual         | none | Individual | Returns the individual
+
+### Gedcom operations
+
+Method                  | Parameters | Returns | Description 
+------------------------|------------|---------|------------
+get_root_element        | none | Element root | Returns the virtual "root" individual
+get_root_child_elements | none | List of Element | Returns a List of all Elements
+get_element_dictionary  | none | Dict of Element | Returns a Dict of all Elements
+get_element_list        | none | List of Element | Returns a List of all Elements
+get_marriages           | Element individual | List of Marriage ("Date", "Place") | Returns List of Tuples of Marriage data (Date and Place)
+find_path_to_ancestors  | Element descendant, Element ancestor||
+get_family_members      | Element individual, optional String members_type - one of "ALL" (default), "PARENTS", "HUSB", "WIFE", "CHIL" | List of Element individuals||
+get_parents             | Element individual, optional String parent_type - one of "ALL" (default) or "NAT" | List of Element individuals|
+get_ancestors           | Element individual, optional String ancestor_type - one of "All" (default) or "NAT" ||
+get_families            | Element individual optional String family_type - one of "FAMS" (default), "FAMC"||
+marriage_range_match    | Element individual, Int from, Int to| Boolean | Check if individual is married within the specified range
+marriage_year_match     | Element individual, Int year| Boolean | Check if individual is married in the year specified
+get_marriage_years      | Element individual |List of Int| Returns Marriage event years
+print_gedcom            | none | none | Prints the gedcom to STDOUT
+save_gedcom             | String filename | none | Writes gedcom to specified filename
 
 ## History
 
@@ -44,7 +128,15 @@ Daniel Zappala at Brigham Young University (Copyright (C) 2005) which
 was licensed under the GPL v2 and then continued by
 [Mad Price Ball](https://github.com/madprime) in 2012.
 
+Further updates by [Nicklas Reincke](https://github.com/nickreynke) and [Damon Brodie](https://github.com/nomadyow) in 2018.
+
 ## Changelog
+
+**v0.2.2dev**
+
+- Support BOM control characters
+- Support the last line not having a CR and/or LF
+- Support incorrect line splitting generated by Ancestry.  Insert CONT/CONC tag as necessary
 
 **v0.2.1dev**
 
@@ -70,6 +162,7 @@ was licensed under the GPL v2 and then continued by
 Licensed under the [GNU General Public License v2](http://www.gnu.org/licenses/gpl-2.0.html)
 
 **Python GEDCOM Parser**
+<br>Copyright (C) 2018 Damon Brodie (damon.brodie at gmail.com)
 <br>Copyright (C) 2018 Nicklas Reincke (contact at reynke.com)
 <br>Copyright (C) 2016 Andreas Oberritter
 <br>Copyright (C) 2012 Madeleine Price Ball

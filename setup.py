@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='python-gedcom',
-    version='0.2.0dev',
+    version='0.2.2dev',
     packages=['gedcom', ],
     license='GPLv2',
     package_dir={'': '.'},
