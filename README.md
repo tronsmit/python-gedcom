@@ -37,7 +37,7 @@ gedcom = Gedcom(file_path)
 
 ### GEDCOM Quirks
 
-Large sites like Ancesty and MyHeritage (among others) don't always produce perfectly formatted GEDCOM files.  If you encounter errors in parsing, you might consider disabling strict parsing which will make a best effort to parse file:
+Large sites like Ancesty and MyHeritage (among others) don't always produce perfectly formatted GEDCOM files.  If you encounter errors in parsing, you might consider disabling strict parsing which will make a best effort to parse the file:
 
 
 ```python
@@ -69,30 +69,30 @@ get_parent_element     |||
 new_child_element      |||
 add_child_element      |||
 set_parent_element     |            |         |
-is_individual          | none       | Boolean |
-is_family              | none       | Boolean |
+is_individual          | none       | Boolean | Is this record of a person
+is_family              | none       | Boolean | 
 is_file                | none       | Boolean |
 is_object              | none       | Boolean |
-is_private             | none       | Boolean |
-is_deceased            | none       | Boolean |
-criteria_match         |||
-surname_match          |||
-given_match            |||
-death_range_match      |||
-death_year_match       |||
-birth_range_match      |||
-birth_year_match       |||
-get_name               |||
-get_gender             |||
-get_birth_data         |||
-get_birth_year         |||
-get_death_data         |||
-get_death_year         |||
-get_burial             |||
-get_census             |||
-get_last_change_date   |||
-get_occupation         |||
-get_individual         |||
+is_private             | none       | Boolean | Returns True if the record is marked Private
+is_deceased            | none       | Boolean | Returns True if the individual is marked deceased
+criteria_match         |colon separated string "surname=[name]:name=[name]:birth][year]:birth_range=[year-to-year]:death=[year]:death_range[year-to-year]"| Boolean | Returns True if the criteria matches
+surname_match          | String | Boolean | Returns True if substring matches
+given_match            | String | Boolean | Returns True if subscring matches
+death_range_match      | Int from, Int to | Boolean | Returns True if Death Year is in the supplied range
+death_year_match       | Int | Boolean | Returns True if Death Year equals parameter
+birth_range_match      | Int from, Int to | Boolean | Returns True if Birth Year is in the supplied range
+birth_year_match       | Int | Boolean | Returns True if Birth Year equals parameter
+get_name               | none | (String given, String surname) | Returns the Given name(s) and Surname in a tuple
+get_gender             | none | String | Returns individual's gender
+get_birth_data         | none | (String date, String place, Array sources) | Returns a tuple of the birth data
+get_birth_year         | none | Int | Returns the Birth Year
+get_death_data         | none | (String date, String place, Array sources) | Returns a tuple of the death data
+get_death_year         | none | Int | Returns the Death Year
+get_burial         | none | (String date, String place, Array sources) | Returns a tuple of the burial data
+get_census         | none | List [String date, String place, Array sources] | Returns a List of tuple of the census data
+get_last_change_date   | none | String | Returns the date of the last update to this individual
+get_occupation         | none | String | Returns the individual's occupation
+get_individual         | none | Individual | Returns the individual
 
 ### Gedcom operations
 
