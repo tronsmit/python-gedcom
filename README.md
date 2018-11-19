@@ -47,6 +47,11 @@ file_path = '' # Path to your `.ged` file
 gedcom = Gedcom(file_path, False) # Disable strict parsing
 ```
 
+Disabling strict parsing will allow the parser to gracefully handle the following quirks:
+
+- Multi-line fields that don't use CONC or CONT
+- Handle the last line not ending in a CRLF
+
 ### Iterate through all records, search last names and print matches
 
 ```python
@@ -59,6 +64,8 @@ for record in all_records:
 ```
 
 ## Reference
+
+The Element class contains all the information for a single record in the GEDCOM file, for example and individual.
 
 ### Single Record Methods
 
@@ -96,32 +103,23 @@ get_individual         | none | Individual | Returns the individual
 
 ### Gedcom operations
 
-Method                  | Parameters | Returns | Description |
-------------------------|------------|---------|-------------|
-get_root_element        ||||
-get_root_child_elements ||||
-get_element_dictionary  ||||
-get_element_list        ||||
-get_marriages           ||||
-find_path_to_ancestors  ||||
-get_family_members      ||||
-get_parents             ||||
-get_ancestors           ||||
-get_families            ||||
-marriage_range_match    ||||
-marriage_year_match     ||||
-get_marriage_years      ||||
-print_gedcom            ||||
-save_gedcom             ||||
-
-
-## Quirk Handling
-
-Some genealogical websites like MyHeritage and Ancestry produce GEDCOM files that are somewhat out of spec.  This module aims to handle these quirks.  Specifically that includes:
-
-- Ignoring BOM control characters
-- Multi-line fields that don't use CONC or CONT
-- Handle the last line not ending in a CRLF
+Method                  | Parameters | Returns | Description 
+------------------------|------------|---------|------------
+get_root_element        | none | Element root | Returns the virtual "root" individual
+get_root_child_elements | none | List of Element | Returns a List of all Elements
+get_element_dictionary  | none | Dict of Element | Returns a Dict of all Elements
+get_element_list        | none | List of Element | Returns a List of all Elements
+get_marriages           | Element individual | List of Marriage ("Date", "Place") | Returns List of Tuples of Marriage data (Date and Place)
+find_path_to_ancestors  | Element descendant, Element ancestor||
+get_family_members      | Element individual, optional String members_type - one of "ALL" (default), "PARENTS", "HUSB", "WIFE", "CHIL" | List of Element individuals||
+get_parents             | Element individual, optional String parent_type - one of "ALL" (default) or "NAT" | List of Element individuals|
+get_ancestors           | Element individual, optional String ancestor_type - one of "All" (default) or "NAT" ||
+get_families            | Element individual optional String family_type - one of "FAMS" (default), "FAMC"||
+marriage_range_match    | Element individual, Int from, Int to| Boolean | Check if individual is married within the specified range
+marriage_year_match     | Element individual, Int year| Boolean | Check if individual is married in the year specified
+get_marriage_years      | Element individual |List of Int| Returns Marriage event years
+print_gedcom            | none | none | Prints the gedcom to STDOUT
+save_gedcom             | String filename | none | Writes gedcom to specified filename
 
 ## History
 
