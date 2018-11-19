@@ -71,18 +71,18 @@ The Element class contains all the information for a single record in the GEDCOM
 
 Method                 | Parameters | Returns | Description
 -----------------------|------------|---------|------------
-get_child_elements     |||
-get_parent_element     |||
-new_child_element      |||
-add_child_element      |||
-set_parent_element     |            |         |
-is_individual          | none       | Boolean | Is this record of a person
-is_family              | none       | Boolean | 
-is_file                | none       | Boolean |
-is_object              | none       | Boolean |
-is_private             | none       | Boolean | Returns True if the record is marked Private
-is_deceased            | none       | Boolean | Returns True if the individual is marked deceased
-criteria_match         |colon separated string "surname=[name]:name=[name]:birth][year]:birth_range=[year-to-year]:death=[year]:death_range[year-to-year]"| Boolean | Returns True if the criteria matches
+get_child_elements     | none          | List of Element | Returns all the child elements of this record
+get_parent_element     | none          | Element | Returns parent Element
+new_child_element      | String tag, String pointer, String value | Element | Create a new Element
+add_child_element      | Element child | Element | Adds the child record
+set_parent_element     | Element parent| none | Not normally required to be called (add_child_element calls this automatically
+is_individual          | none          | Boolean | Is this record of a person
+is_family              | none          | Boolean | 
+is_file                | none          | Boolean |
+is_object              | none          | Boolean |
+is_private             | none          | Boolean | Returns True if the record is marked Private
+is_deceased            | none          | Boolean | Returns True if the individual is marked deceased
+criteria_match         | colon separated string "surname=[name]:name=[name]:birth][year]:birth_range=[year-to-year]:death=[year]:death_range[year-to-year]"| Boolean | Returns True if the criteria matches
 surname_match          | String | Boolean | Returns True if substring matches
 given_match            | String | Boolean | Returns True if subscring matches
 death_range_match      | Int from, Int to | Boolean | Returns True if Death Year is in the supplied range
