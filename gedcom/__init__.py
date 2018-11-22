@@ -346,14 +346,14 @@ class Gedcom:
         for family in families:
             for family_data in family.get_child_elements():
                 if family_data.get_tag() == GEDCOM_TAG_MARRIAGE:
+                    date = ''
+                    place = ''
                     for marriage_data in family_data.get_child_elements():
-                        date = ''
-                        place = ''
                         if marriage_data.get_tag() == GEDCOM_TAG_DATE:
                             date = marriage_data.get_value()
                         if marriage_data.get_tag() == GEDCOM_TAG_PLACE:
                             place = marriage_data.get_value()
-                        marriages.append((date, place))
+                    marriages.append((date, place))
         return marriages
 
     def get_marriage_years(self, individual):
