@@ -920,8 +920,8 @@ class Element:
         
         # Return the first GEDCOM_TAG_NAME that is found.  Alternatively
         # as soon as we have both the GETCOM_TAG_GIVEN_NAME and _SURNAME return those
-        found_given = False
-        found_surname = False
+        found_given_name = False
+        found_surname_name = False
         for child in self.get_child_elements():
             if child.get_tag() == GEDCOM_TAG_NAME:
                 # some GEDCOM files don't use child tags but instead
@@ -937,11 +937,11 @@ class Element:
                     for childOfChild in child.get_child_elements():
                         if childOfChild.get_tag() == GEDCOM_TAG_GIVEN_NAME:
                             first = childOfChild.get_value()
-                            found_given = True
+                            found_given_name = True
                         if childOfChild.get_tag() == GEDCOM_TAG_SURNAME:
                             last = childOfChild.get_value()
-                            found_surname = True
-                    if found_given and found_surname:
+                            found_surname_name = True
+                    if found_given_name and found_surname_name:
                         return first, last
 
         # If we reach here we are probably returning empty strings
