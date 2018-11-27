@@ -132,6 +132,10 @@ Further updates by [Nicklas Reincke](https://github.com/nickreynke) and [Damon B
 
 ## Changelog
 
+**v0.2.3dev**
+- Assemble Marriages properly
+- Return the top NAME record instead of the last one
+
 **v0.2.2dev**
 
 - Support BOM control characters
