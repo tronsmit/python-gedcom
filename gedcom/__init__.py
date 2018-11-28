@@ -346,14 +346,14 @@ class Gedcom:
         for family in families:
             for family_data in family.get_child_elements():
                 if family_data.get_tag() == GEDCOM_TAG_MARRIAGE:
+                    date = ''
+                    place = ''
                     for marriage_data in family_data.get_child_elements():
-                        date = ''
-                        place = ''
                         if marriage_data.get_tag() == GEDCOM_TAG_DATE:
                             date = marriage_data.get_value()
                         if marriage_data.get_tag() == GEDCOM_TAG_PLACE:
                             place = marriage_data.get_value()
-                        marriages.append((date, place))
+                    marriages.append((date, place))
         return marriages
 
     def get_marriage_years(self, individual):
@@ -917,9 +917,14 @@ class Element:
         last = ""
         if not self.is_individual():
             return first, last
+        
+        # Return the first GEDCOM_TAG_NAME that is found.  Alternatively
+        # as soon as we have both the GETCOM_TAG_GIVEN_NAME and _SURNAME return those
+        found_given_name = False
+        found_surname_name = False
         for child in self.get_child_elements():
             if child.get_tag() == GEDCOM_TAG_NAME:
-                # some older GEDCOM files don't use child tags but instead
+                # some GEDCOM files don't use child tags but instead
                 # place the name in the value of the NAME tag
                 if child.get_value() != "":
                     name = child.get_value().split('/')
@@ -927,12 +932,19 @@ class Element:
                         first = name[0].strip()
                         if len(name) > 1:
                             last = name[1].strip()
+                    return first, last
                 else:
                     for childOfChild in child.get_child_elements():
                         if childOfChild.get_tag() == GEDCOM_TAG_GIVEN_NAME:
                             first = childOfChild.get_value()
+                            found_given_name = True
                         if childOfChild.get_tag() == GEDCOM_TAG_SURNAME:
                             last = childOfChild.get_value()
+                            found_surname_name = True
+                    if found_given_name and found_surname_name:
+                        return first, last
+
+        # If we reach here we are probably returning empty strings
         return first, last
 
     def get_gender(self):
