@@ -132,7 +132,12 @@ Further updates by [Nicklas Reincke](https://github.com/nickreynke) and [Damon B
 
 ## Changelog
 
+**v0.2.4dev**
+
+- Make surname_match and given_match case insensitive
+
 **v0.2.3dev**
+
 - Assemble Marriages properly ([#9](https://github.com/nickreynke/python-gedcom/issues/9))
 - Return the top NAME record instead of the last one ([#9](https://github.com/nickreynke/python-gedcom/issues/9))
 

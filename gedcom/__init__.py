@@ -863,7 +863,7 @@ class Element:
         :rtype: bool
         """
         (first, last) = self.get_name()
-        return last.find(name) >= 0
+        return regex.search(name, last, regex.IGNORECASE)
 
     def given_match(self, name):
         """Match a string with the given names of an individual
@@ -871,7 +871,7 @@ class Element:
         :rtype: bool
         """
         (first, last) = self.get_name()
-        return first.find(name) >= 0
+        return regex.search(name, first, regex.IGNORECASE)
 
     def birth_year_match(self, year):
         """Match the birth year of an individual
