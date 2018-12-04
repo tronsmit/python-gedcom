@@ -113,8 +113,8 @@ get_element_list        | none | List of Element | Returns a List of all Element
 get_marriages           | Element individual | List of Marriage ("Date", "Place") | Returns List of Tuples of Marriage data (Date and Place)
 find_path_to_ancestors  | Element descendant, Element ancestor||
 get_family_members      | Element family, optional String members_type - one of "ALL" (default), "PARENTS", "HUSB", "WIFE", "CHIL" | List of Element individuals||
-get_parents             | Element individual, optional String parent_type - one of "ALL" (default) or "NAT" | List of Element individuals|
-get_ancestors           | Element individual, optional String ancestor_type - one of "All" (default) or "NAT" ||
+get_parents             | Element individual, optional String parent_type - one of "ALL" (default) or "NAT" | List of Element individuals |
+get_ancestors           | Element individual, optional String ancestor_type - one of "All" (default) or "NAT" | List of Element individuals | Recursively retrieves all the parents starting with the supplied individual
 get_families            | Element individual optional String family_type - one of "FAMS" (default), "FAMC"|List of Family records | Family Records can be used in get_family_members()
 marriage_range_match    | Element individual, Int from, Int to| Boolean | Check if individual is married within the specified range
 marriage_year_match     | Element individual, Int year| Boolean | Check if individual is married in the year specified
