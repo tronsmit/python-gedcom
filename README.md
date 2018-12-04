@@ -76,10 +76,10 @@ get_parent_element     | none          | Element | Returns parent Element
 new_child_element      | String tag, String pointer, String value | Element | Create a new Element
 add_child_element      | Element child | Element | Adds the child record
 set_parent_element     | Element parent| none | Not normally required to be called (add_child_element calls this automatically
-is_individual          | none          | Boolean | Is this record of a person
-is_family              | none          | Boolean | IS this record of a family.  Family records can be passed to get_family_members()
-is_file                | none          | Boolean |
-is_object              | none          | Boolean |
+is_individual          | none          | Boolean | Returns True if the record is that of a person
+is_family              | none          | Boolean | Returns True if thet record of a family.  Family records can be passed to get_family_members()
+is_file                | none          | Boolean | Returns True if the record is a pointer to an external file
+is_object              | none          | Boolean | Returns True if the record is an object (for example multi-media) stored inside the gedcom
 is_private             | none          | Boolean | Returns True if the record is marked Private
 is_deceased            | none          | Boolean | Returns True if the individual is marked deceased
 is_child               | none          | Boolean | Returns True if the individual is a child
