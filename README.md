@@ -82,6 +82,7 @@ is_file                | none          | Boolean |
 is_object              | none          | Boolean |
 is_private             | none          | Boolean | Returns True if the record is marked Private
 is_deceased            | none          | Boolean | Returns True if the individual is marked deceased
+is_child               | none          | Boolean | Returns True if the individual is a child
 criteria_match         | colon separated string "surname=[name]:name=[name]:birth][year]:birth_range=[year-to-year]:death=[year]:death_range[year-to-year]"| Boolean | Returns True if the criteria matches
 surname_match          | String | Boolean | Returns True if substring matches
 given_match            | String | Boolean | Returns True if substring matches
@@ -111,7 +112,7 @@ get_element_dictionary  | none | Dict of Element | Returns a Dict of all Element
 get_element_list        | none | List of Element | Returns a List of all Elements
 get_marriages           | Element individual | List of Marriage ("Date", "Place") | Returns List of Tuples of Marriage data (Date and Place)
 find_path_to_ancestors  | Element descendant, Element ancestor||
-get_family_members      | Element individual, optional String members_type - one of "ALL" (default), "PARENTS", "HUSB", "WIFE", "CHIL" | List of Element individuals||
+get_family_members      | Element family, optional String members_type - one of "ALL" (default), "PARENTS", "HUSB", "WIFE", "CHIL" | List of Element individuals||
 get_parents             | Element individual, optional String parent_type - one of "ALL" (default) or "NAT" | List of Element individuals|
 get_ancestors           | Element individual, optional String ancestor_type - one of "All" (default) or "NAT" ||
 get_families            | Element individual optional String family_type - one of "FAMS" (default), "FAMC"||
