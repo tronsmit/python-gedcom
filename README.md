@@ -122,6 +122,18 @@ get_marriage_years      | Element individual |List of Int| Returns Marriage even
 print_gedcom            | none | none | Prints the gedcom to STDOUT
 save_gedcom             | String filename | none | Writes gedcom to specified filename
 
+## Local development
+
+Local development is powered with [Docker Compose](https://docs.docker.com/compose/).
+
+### Uploading a new package to PyPI
+
+1. Run `docker-compose run --rm python python3 setup.py sdist bdist_wheel` to generate distribution archives
+1. Run `docker-compose run --rm python twine upload --repository-url https://test.pypi.org/legacy/ dist/*` to upload the archives to the Test Python Package Index repository
+
+> When the package is ready to be published to the real Python Package Index
+the URL is `repository-url` is `https://upload.pypi.org/legacy/`.
+
 ## History
 
 This module was originally based on a GEDCOM parser written by 
