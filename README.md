@@ -147,7 +147,7 @@ Further updates by [Nicklas Reincke](https://github.com/nickreynke) and [Damon B
 
 **v0.2.4dev**
 
-- Make surname_match and given_match case insensitive
+- Make surname_match and given_match case insensitive ([#10](https://github.com/nickreynke/python-gedcom/issues/10))
 - add new is_child method
 
 **v0.2.3dev**
