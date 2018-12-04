@@ -77,7 +77,7 @@ new_child_element      | String tag, String pointer, String value | Element | Cr
 add_child_element      | Element child | Element | Adds the child record
 set_parent_element     | Element parent| none | Not normally required to be called (add_child_element calls this automatically
 is_individual          | none          | Boolean | Is this record of a person
-is_family              | none          | Boolean | 
+is_family              | none          | Boolean | IS this record of a family.  Family records can be passed to get_family_members()
 is_file                | none          | Boolean |
 is_object              | none          | Boolean |
 is_private             | none          | Boolean | Returns True if the record is marked Private
@@ -115,7 +115,7 @@ find_path_to_ancestors  | Element descendant, Element ancestor||
 get_family_members      | Element family, optional String members_type - one of "ALL" (default), "PARENTS", "HUSB", "WIFE", "CHIL" | List of Element individuals||
 get_parents             | Element individual, optional String parent_type - one of "ALL" (default) or "NAT" | List of Element individuals|
 get_ancestors           | Element individual, optional String ancestor_type - one of "All" (default) or "NAT" ||
-get_families            | Element individual optional String family_type - one of "FAMS" (default), "FAMC"||
+get_families            | Element individual optional String family_type - one of "FAMS" (default), "FAMC"|List of Family records. | Family Records can be used in get_family_members()
 marriage_range_match    | Element individual, Int from, Int to| Boolean | Check if individual is married within the specified range
 marriage_year_match     | Element individual, Int year| Boolean | Check if individual is married in the year specified
 get_marriage_years      | Element individual |List of Int| Returns Marriage event years
