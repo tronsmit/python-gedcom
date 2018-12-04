@@ -84,8 +84,8 @@ is_private             | none          | Boolean | Returns True if the record is
 is_deceased            | none          | Boolean | Returns True if the individual is marked deceased
 is_child               | none          | Boolean | Returns True if the individual is a child
 criteria_match         | colon separated string "surname=[name]:name=[name]:birth][year]:birth_range=[year-to-year]:death=[year]:death_range[year-to-year]"| Boolean | Returns True if the criteria matches
-surname_match          | String | Boolean | Returns True if substring matches
-given_match            | String | Boolean | Returns True if substring matches
+surname_match          | String | Boolean | Returns True if the case insensitive substring matches the supplied string
+given_match            | String | Boolean | Returns True if the case insensitive substring matches the supplied string
 death_range_match      | Int from, Int to | Boolean | Returns True if Death Year is in the supplied range
 death_year_match       | Int | Boolean | Returns True if Death Year equals parameter
 birth_range_match      | Int from, Int to | Boolean | Returns True if Birth Year is in the supplied range
