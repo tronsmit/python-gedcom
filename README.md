@@ -12,6 +12,8 @@ the GEDCOM 5.5 format which is detailed [here](https://chronoplexsoftware.com/ge
 
 > **NOTE**: This module is currently under development and **should not be used in production**!
 > The current development process can be tracked in the ["develop" branch](https://github.com/reynke/python-gedcom/tree/develop).
+>If you wish to use the pre-production version of the python-gedcom packages, then supply the --pre command line to pip:
+> pip install python-gedcom --pre
 
 ## Installation
 
