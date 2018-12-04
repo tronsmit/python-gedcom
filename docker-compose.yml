@@ -1,8 +1,9 @@
-version: '2'
+version: '3'
 
 services:
 
   python:
-    build: ./
+    build:
+      context: ./
     volumes:
       - ./:/usr/src/app:z
