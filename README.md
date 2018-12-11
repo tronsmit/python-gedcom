@@ -12,10 +12,6 @@ the GEDCOM 5.5 format which is detailed [here](https://chronoplexsoftware.com/ge
 
 > **NOTE**: This module is currently under development and **should not be used in production**!
 > The current development process can be tracked in the ["develop" branch](https://github.com/reynke/python-gedcom/tree/develop).
->
->If you wish to use the pre-production version of the python-gedcom packages, then supply the --pre command line to pip:
->
-> pip install python-gedcom --pre
 
 ## Installation
 
@@ -80,16 +76,15 @@ get_parent_element     | none          | Element | Returns parent Element
 new_child_element      | String tag, String pointer, String value | Element | Create a new Element
 add_child_element      | Element child | Element | Adds the child record
 set_parent_element     | Element parent| none | Not normally required to be called (add_child_element calls this automatically
-is_individual          | none          | Boolean | Returns True if the record is that of a person
-is_family              | none          | Boolean | Returns True if thet record of a family.  Family records can be passed to get_family_members()
-is_file                | none          | Boolean | Returns True if the record is a pointer to an external file
-is_object              | none          | Boolean | Returns True if the record is an object (for example multi-media) stored inside the gedcom
+is_individual          | none          | Boolean | Is this record of a person
+is_family              | none          | Boolean | 
+is_file                | none          | Boolean |
+is_object              | none          | Boolean |
 is_private             | none          | Boolean | Returns True if the record is marked Private
 is_deceased            | none          | Boolean | Returns True if the individual is marked deceased
-is_child               | none          | Boolean | Returns True if the individual is a child
 criteria_match         | colon separated string "surname=[name]:name=[name]:birth][year]:birth_range=[year-to-year]:death=[year]:death_range[year-to-year]"| Boolean | Returns True if the criteria matches
-surname_match          | String | Boolean | Returns True if the case insensitive substring matches the supplied string
-given_match            | String | Boolean | Returns True if the case insensitive substring matches the supplied string
+surname_match          | String | Boolean | Returns True if substring matches
+given_match            | String | Boolean | Returns True if substring matches
 death_range_match      | Int from, Int to | Boolean | Returns True if Death Year is in the supplied range
 death_year_match       | Int | Boolean | Returns True if Death Year equals parameter
 birth_range_match      | Int from, Int to | Boolean | Returns True if Birth Year is in the supplied range
@@ -115,11 +110,11 @@ get_root_child_elements | none | List of Element | Returns a List of all Element
 get_element_dictionary  | none | Dict of Element | Returns a Dict of all Elements
 get_element_list        | none | List of Element | Returns a List of all Elements
 get_marriages           | Element individual | List of Marriage ("Date", "Place") | Returns List of Tuples of Marriage data (Date and Place)
-find_path_to_ancestors  | Element descendant, Element ancestor| List of Element| Returns list of individuals from the descendant Element to the ancestor Element.  Returns None if there is no direct path
-get_family_members      | Element family, optional String members_type - one of "ALL" (default), "PARENTS", "HUSB", "WIFE", "CHIL" | List of Element individuals | Returns a list of individuals for the supplied family record, filtered by the members_type
-get_parents             | Element individual, optional String parent_type - one of "ALL" (default) or "NAT" | List of Element individuals | Returns the individual's parents as a List
-get_ancestors           | Element individual, optional String ancestor_type - one of "All" (default) or "NAT" | List of Element individuals | Recursively retrieves all the parents starting with the supplied individual
-get_families            | Element individual optional String family_type - one of "FAMS" (default), "FAMC"|List of Family records | Family Records can be used in get_family_members()
+find_path_to_ancestors  | Element descendant, Element ancestor||
+get_family_members      | Element individual, optional String members_type - one of "ALL" (default), "PARENTS", "HUSB", "WIFE", "CHIL" | List of Element individuals||
+get_parents             | Element individual, optional String parent_type - one of "ALL" (default) or "NAT" | List of Element individuals|
+get_ancestors           | Element individual, optional String ancestor_type - one of "All" (default) or "NAT" ||
+get_families            | Element individual optional String family_type - one of "FAMS" (default), "FAMC"||
 marriage_range_match    | Element individual, Int from, Int to| Boolean | Check if individual is married within the specified range
 marriage_year_match     | Element individual, Int year| Boolean | Check if individual is married in the year specified
 get_marriage_years      | Element individual |List of Int| Returns Marriage event years
@@ -149,13 +144,7 @@ Further updates by [Nicklas Reincke](https://github.com/nickreynke) and [Damon B
 
 ## Changelog
 
-**v0.2.4dev**
-
-- Make surname_match and given_match case insensitive ([#10](https://github.com/nickreynke/python-gedcom/issues/10))
-- add new is_child method
-
 **v0.2.3dev**
-
 - Assemble Marriages properly ([#9](https://github.com/nickreynke/python-gedcom/issues/9))
 - Return the top NAME record instead of the last one ([#9](https://github.com/nickreynke/python-gedcom/issues/9))
 
