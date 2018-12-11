@@ -767,18 +767,6 @@ class Element:
         """
         return self.get_tag() == GEDCOM_TAG_INDIVIDUAL
 
-    def is_child(self):
-        """Check if this element is a child
-        :rtype: bool
-        """
-        if not self.is_individual():
-            raise ValueError("Operation only valid for elements with %s tag" % GEDCOM_TAG_INDIVIDUAL)
-        found_child = False
-        for child in self.get_child_elements():
-            if child.get_tag() == GEDCOM_TAG_FAMILY_CHILD:
-                found_child = True
-        return found_child
-
     def is_family(self):
         """Check if this element is a family
         :rtype: bool
@@ -875,7 +863,7 @@ class Element:
         :rtype: bool
         """
         (first, last) = self.get_name()
-        return regex.search(name, last, regex.IGNORECASE)
+        return last.find(name) >= 0
 
     def given_match(self, name):
         """Match a string with the given names of an individual
@@ -883,7 +871,7 @@ class Element:
         :rtype: bool
         """
         (first, last) = self.get_name()
-        return regex.search(name, first, regex.IGNORECASE)
+        return first.find(name) >= 0
 
     def birth_year_match(self, year):
         """Match the birth year of an individual
@@ -931,7 +919,7 @@ class Element:
             return first, last
         
         # Return the first GEDCOM_TAG_NAME that is found.  Alternatively
-        # as soon as we have both the GEDCOM_TAG_GIVEN_NAME and _SURNAME return those
+        # as soon as we have both the GETCOM_TAG_GIVEN_NAME and _SURNAME return those
         found_given_name = False
         found_surname_name = False
         for child in self.get_child_elements():
