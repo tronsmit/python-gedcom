@@ -123,12 +123,16 @@ Method | Parameters | Returns | Description
 
 ## Local development
 
+I suggest using [pyenv](https://github.com/pyenv/pyenv) for local development.
+
 ### Running tests
 
 1. Run `pip<version> install --no-cache-dir -r requirements.txt` to install dependencies
 1. Run tests with [tox](https://tox.readthedocs.io/en/latest/index.html)
     * For Python 2.7 run `tox -e py27` (you need to have Python 2.7 installed)
-    * For Python 3.7 run `tox -e py37` (you need to have Python 3.7 installed)
+    * For Python 3.4 run `tox -e py34` (you need to have Python 3.6 installed)
+    * For Python 3.5 run `tox -e py35` (you need to have Python 3.6 installed)
+    * For Python 3.6 run `tox -e py36` (you need to have Python 3.6 installed)
 
 ### Uploading a new package to PyPI
 
