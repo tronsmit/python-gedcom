@@ -2,6 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/python-gedcom.svg)](https://pypi.org/project/python-gedcom/)
 [![GitHub release](https://img.shields.io/github/release/nickreynke/python-gedcom.svg)](https://github.com/nickreynke/python-gedcom/releases)
+[![Build Status](https://travis-ci.org/nickreynke/python-gedcom.svg?branch=master)](https://travis-ci.org/nickreynke/python-gedcom)
 ![](https://img.shields.io/badge/GEDCOM%20format%20version-5.5-yellowgreen.svg)
 ![](https://img.shields.io/badge/Python%20versions-2.7%20and%203.7-yellowgreen.svg)
 
@@ -154,14 +155,21 @@ Further updates by [Nicklas Reincke](https://github.com/nickreynke) and [Damon B
 
 ## Changelog
 
+**v0.2.5dev**
+
+- Updated project structure ([#18](https://github.com/nickreynke/python-gedcom/issues/18))
+- Fixed `setup.py` outputting correct markdown when reading the `README.md` ([#16](https://github.com/nickreynke/python-gedcom/issues/16))
+- Applied Flake8 code style and **added explicit error handling**
+- Set up test suite
+
 **v0.2.4dev**
 
-- Make surname_match and given_match case insensitive ([#10](https://github.com/nickreynke/python-gedcom/issues/10))
-- add new is_child method
+- Made `surname_match` and `given_match` case insensitive ([#10](https://github.com/nickreynke/python-gedcom/issues/10))
+- Added new `is_child` method ([#10](https://github.com/nickreynke/python-gedcom/issues/10))
 
 **v0.2.3dev**
 
-- Assemble Marriages properly ([#9](https://github.com/nickreynke/python-gedcom/issues/9))
+- Assemble marriages properly ([#9](https://github.com/nickreynke/python-gedcom/issues/9))
 - Return the top NAME record instead of the last one ([#9](https://github.com/nickreynke/python-gedcom/issues/9))
 
 **v0.2.2dev**
