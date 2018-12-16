@@ -138,7 +138,7 @@ class Gedcom:
       - a dict (only elements with pointers, which are the keys)
     """
 
-    def __init__(self, file_path, use_strict = True):
+    def __init__(self, file_path, use_strict=True):
         """Initialize a GEDCOM data object. You must supply a GEDCOM file
         :type file_path: str
         """
@@ -215,7 +215,7 @@ class Gedcom:
 
     # Private methods
 
-    def __parse(self, file_path, use_strict = True):
+    def __parse(self, file_path, use_strict=True):
         """Open and parse file path as GEDCOM 5.5 formatted data
         :type file_path: str
         """
@@ -223,11 +223,11 @@ class Gedcom:
         line_number = 1
         last_element = self.__root_element
         for line in gedcom_file:
-            last_element = self.__parse_line(line_number, line.decode('utf-8-sig'), last_element, use_strict )
+            last_element = self.__parse_line(line_number, line.decode('utf-8-sig'), last_element, use_strict)
             line_number += 1
 
     @staticmethod
-    def __parse_line(line_number, line, last_element, use_strict = True):
+    def __parse_line(line_number, line, last_element, use_strict=True):
         """Parse a line from a GEDCOM 5.5 formatted document
 
         Each line should have the following (bracketed items optional):
@@ -260,8 +260,8 @@ class Gedcom:
 
         if regex_match is None:
             if use_strict:
-                error_message = ("Line %d of document violates GEDCOM format 5.5" % line_number +
-                "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
+                error_message = ("Line %d of document violates GEDCOM format 5.5" % line_number
+                                 + "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
                 raise SyntaxError(error_message)
             else:
                 # Quirk check - see if this is a line without a CRLF (which could be the last line)
@@ -269,16 +269,16 @@ class Gedcom:
                 regex_match = regex.match(last_line_regex, line)
                 if regex_match is not None:
                     line_parts = regex_match.groups()
-        
+
                     level = int(line_parts[0])
                     pointer = line_parts[1].rstrip(' ')
                     tag = line_parts[2]
                     value = line_parts[3][1:]
                     crlf = '\n'
                 else:
-                    # Quirk check - Sometimes a gedcom has a text field with a CR.  
-                    # This creates a line without the standard level and pointer.  If this is detected 
-                    # then turn it into a CONC or CONT
+                    # Quirk check - Sometimes a gedcom has a text field with a CR.
+                    # This creates a line without the standard level and pointer.
+                    # If this is detected then turn it into a CONC or CONT.
                     line_regex = '([^\n\r]*|)'
                     cont_line_regex = line_regex + end_of_line_regex
                     regex_match = regex.match(cont_line_regex, line)
@@ -294,7 +294,7 @@ class Gedcom:
                         tag = GEDCOM_TAG_CONCATENATION
         else:
             line_parts = regex_match.groups()
-    
+
             level = int(line_parts[0])
             pointer = line_parts[1].rstrip(' ')
             tag = line_parts[2]
@@ -303,9 +303,9 @@ class Gedcom:
 
         # Check level: should never be more than one higher than previous line.
         if level > last_element.get_level() + 1:
-            error_message = ("Line %d of document violates GEDCOM format 5.5" % line_number +
-                             "\nLines must be no more than one level higher than previous line." +
-                             "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
+            error_message = ("Line %d of document violates GEDCOM format 5.5" % line_number
+                             + "\nLines must be no more than one level higher than previous line."
+                             + "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
             raise SyntaxError(error_message)
 
         # Create element. Store in list and dict, create children and parents.
@@ -416,9 +416,9 @@ class Gedcom:
         families = []
         element_dictionary = self.get_element_dictionary()
         for child_element in individual.get_child_elements():
-            is_family = (child_element.get_tag() == family_type and
-                         child_element.get_value() in element_dictionary and
-                         element_dictionary[child_element.get_value()].is_family())
+            is_family = (child_element.get_tag() == family_type
+                         and child_element.get_value() in element_dictionary
+                         and element_dictionary[child_element.get_value()].is_family())
             if is_family:
                 families.append(element_dictionary[child_element.get_value()])
         return families
@@ -508,12 +508,12 @@ class Gedcom:
         element_dictionary = self.get_element_dictionary()
         for child_element in family.get_child_elements():
             # Default is ALL
-            is_family = (child_element.get_tag() == GEDCOM_TAG_HUSBAND or
-                         child_element.get_tag() == GEDCOM_TAG_WIFE or
-                         child_element.get_tag() == GEDCOM_TAG_CHILD)
+            is_family = (child_element.get_tag() == GEDCOM_TAG_HUSBAND
+                         or child_element.get_tag() == GEDCOM_TAG_WIFE
+                         or child_element.get_tag() == GEDCOM_TAG_CHILD)
             if members_type == "PARENTS":
-                is_family = (child_element.get_tag() == GEDCOM_TAG_HUSBAND or
-                             child_element.get_tag() == GEDCOM_TAG_WIFE)
+                is_family = (child_element.get_tag() == GEDCOM_TAG_HUSBAND
+                             or child_element.get_tag() == GEDCOM_TAG_WIFE)
             elif members_type == "HUSB":
                 is_family = child_element.get_tag() == GEDCOM_TAG_HUSBAND
             elif members_type == "WIFE":
@@ -821,13 +821,15 @@ class Element:
         :rtype: bool
         """
 
-        # error checking on the criteria
+        # Check if criteria is a valid criteria
         try:
             for criterion in criteria.split(':'):
-                key, value = criterion.split('=')
-        except:
+                criterion.split('=')
+        except ValueError:
             return False
+
         match = True
+
         for criterion in criteria.split(':'):
             key, value = criterion.split('=')
             if key == "surname" and not self.surname_match(value):
@@ -839,7 +841,7 @@ class Element:
                     year = int(value)
                     if not self.birth_year_match(year):
                         match = False
-                except:
+                except ValueError:
                     match = False
             elif key == "birth_range":
                 try:
@@ -848,14 +850,14 @@ class Element:
                     to_year = int(to_year)
                     if not self.birth_range_match(from_year, to_year):
                         match = False
-                except:
+                except ValueError:
                     match = False
             elif key == "death":
                 try:
                     year = int(value)
                     if not self.death_year_match(year):
                         match = False
-                except:
+                except ValueError:
                     match = False
             elif key == "death_range":
                 try:
@@ -864,7 +866,7 @@ class Element:
                     to_year = int(to_year)
                     if not self.death_range_match(from_year, to_year):
                         match = False
-                except:
+                except ValueError:
                     match = False
 
         return match
@@ -929,7 +931,7 @@ class Element:
         last = ""
         if not self.is_individual():
             return first, last
-        
+
         # Return the first GEDCOM_TAG_NAME that is found.  Alternatively
         # as soon as we have both the GEDCOM_TAG_GIVEN_NAME and _SURNAME return those
         found_given_name = False
@@ -1022,7 +1024,7 @@ class Element:
             return -1
         try:
             return int(date)
-        except:
+        except ValueError:
             return -1
 
     def get_death_data(self):
@@ -1062,7 +1064,7 @@ class Element:
             return -1
         try:
             return int(date)
-        except:
+        except ValueError:
             return -1
 
     def get_burial(self):
