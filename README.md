@@ -65,7 +65,7 @@ for record in all_records:
 
 ## Reference
 
-The `Element` class contains all the information for a single record in the GEDCOM file, for example and individual.
+The `Element` class contains all the information for a single record in the GEDCOM file, for example an individual.
 
 ### `Element` methods
 
