@@ -108,7 +108,8 @@ Method | Parameters | Returns | Description
 -------|------------|---------|------------
 `get_root_element`        | none | Element root | Returns the virtual "root" individual
 `get_root_child_elements` | none | List of Element | Returns a List of all Elements
-`get_element_dictionary`  | none | Dict of Element | Returns a Dict of all Elements
+`get_element_dictionary`  | none | Dict of Element | Returns a Dict of all Elements.  The keys are the record Pointers.  The dictionary is preserved in memory untime invalidate_cache is called
+`invalidate_cache`        | none | none            | This should be called when records are modified, so that the dictionary is rebuilt with the updated records
 `get_element_list`        | none | List of Element | Returns a List of all Elements
 `get_marriages`           | Element individual | List of Marriage ("Date", "Place") | Returns List of Tuples of Marriage data (Date and Place)
 `find_path_to_ancestors`  | Element descendant, Element ancestor| List of Element| Returns list of individuals from the descendant Element to the ancestor Element.  Returns None if there is no direct path
