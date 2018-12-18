@@ -25,8 +25,22 @@
 
 import re as regex
 from sys import version_info
-from gedcom.element import Element
+from gedcom.element.element import Element
+from gedcom.element.family import Family, NotAnActualFamilyError
+from gedcom.element.file import File
+from gedcom.element.individual import Individual, NotAnActualIndividualError
+from gedcom.element.object import Object
 import gedcom.tags
+
+FAMILY_MEMBERS_TYPE_ALL = "ALL"
+FAMILY_MEMBERS_TYPE_CHILDREN = gedcom.tags.GEDCOM_TAG_CHILD
+FAMILY_MEMBERS_TYPE_HUSBAND = gedcom.tags.GEDCOM_TAG_HUSBAND
+FAMILY_MEMBERS_TYPE_PARENTS = "PARENTS"
+FAMILY_MEMBERS_TYPE_WIFE = gedcom.tags.GEDCOM_TAG_WIFE
+
+
+class GedcomFormatViolationError(Exception):
+    pass
 
 
 class Gedcom:
@@ -165,7 +179,7 @@ class Gedcom:
             if use_strict:
                 error_message = ("Line %d of document violates GEDCOM format 5.5" % line_number
                                  + "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
-                raise SyntaxError(error_message)
+                raise GedcomFormatViolationError(error_message)
             else:
                 # Quirk check - see if this is a line without a CRLF (which could be the last line)
                 last_line_regex = level_regex + pointer_regex + tag_regex + value_regex
@@ -209,10 +223,19 @@ class Gedcom:
             error_message = ("Line %d of document violates GEDCOM format 5.5" % line_number
                              + "\nLines must be no more than one level higher than previous line."
                              + "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
-            raise SyntaxError(error_message)
+            raise GedcomFormatViolationError(error_message)
 
         # Create element. Store in list and dict, create children and parents.
-        element = Element(level, pointer, tag, value, crlf, multi_line=False)
+        if tag == gedcom.tags.GEDCOM_TAG_INDIVIDUAL:
+            element = Individual(level, pointer, tag, value, crlf, multi_line=False)
+        elif tag == gedcom.tags.GEDCOM_TAG_FAMILY:
+            element = Family(level, pointer, tag, value, crlf, multi_line=False)
+        elif tag == gedcom.tags.GEDCOM_TAG_FILE:
+            element = File(level, pointer, tag, value, crlf, multi_line=False)
+        elif tag == gedcom.tags.GEDCOM_TAG_OBJECT:
+            element = Object(level, pointer, tag, value, crlf, multi_line=False)
+        else:
+            element = Element(level, pointer, tag, value, crlf, multi_line=False)
 
         # Start with last element as parent, back up if necessary.
         parent_element = last_element
@@ -238,12 +261,14 @@ class Gedcom:
 
     def get_marriages(self, individual):
         """Return list of marriage tuples (date, place) for an individual
-        :type individual: Element
+        :type individual: Individual
         :rtype: tuple
         """
         marriages = []
         if not individual.is_individual():
-            raise ValueError("Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL)
+            raise NotAnActualIndividualError(
+                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+            )
         # Get and analyze families where individual is spouse.
         families = self.get_families(individual, gedcom.tags.GEDCOM_TAG_FAMILY_SPOUSE)
         for family in families:
@@ -261,12 +286,14 @@ class Gedcom:
 
     def get_marriage_years(self, individual):
         """Return list of marriage years (as int) for an individual
-        :type individual: Element
+        :type individual: Individual
         :rtype: list of int
         """
         dates = []
         if not individual.is_individual():
-            raise ValueError("Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL)
+            raise NotAnActualIndividualError(
+                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+            )
         # Get and analyze families where individual is spouse.
         families = self.get_families(individual, gedcom.tags.GEDCOM_TAG_FAMILY_SPOUSE)
         for family in families:
@@ -283,7 +310,7 @@ class Gedcom:
 
     def marriage_year_match(self, individual, year):
         """Check if one of the marriage years of an individual matches the supplied year. Year is an integer.
-        :type individual: Element
+        :type individual: Individual
         :type year: int
         :rtype: bool
         """
@@ -292,7 +319,7 @@ class Gedcom:
 
     def marriage_range_match(self, individual, from_year, to_year):
         """Check if one of the marriage years of an individual is in a given range. Years are integers.
-        :type individual: Element
+        :type individual: Individual
         :type from_year: int
         :type to_year: int
         :rtype: bool
@@ -310,20 +337,25 @@ class Gedcom:
         `gedcom.tags.GEDCOM_TAG_FAMILY_CHILD` (families where the individual is a child). If a value is not
         provided, `gedcom.tags.GEDCOM_TAG_FAMILY_SPOUSE` is default value.
 
-        :type individual: Element
+        :type individual: Individual
         :type family_type: str
-        :rtype: list of Element
+        :rtype: list of Family
         """
         if not individual.is_individual():
-            raise ValueError("Operation only valid for elements with %s tag." % gedcom.tags.GEDCOM_TAG_INDIVIDUAL)
+            raise NotAnActualIndividualError(
+                "Operation only valid for elements with %s tag." % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+            )
+
         families = []
         element_dictionary = self.get_element_dictionary()
+
         for child_element in individual.get_child_elements():
             is_family = (child_element.get_tag() == family_type
                          and child_element.get_value() in element_dictionary
                          and element_dictionary[child_element.get_value()].is_family())
             if is_family:
                 families.append(element_dictionary[child_element.get_value()])
+
         return families
 
     def get_ancestors(self, individual, ancestor_type="ALL"):
@@ -332,17 +364,22 @@ class Gedcom:
         Optional `ancestor_type`. Default "ALL" returns all ancestors, "NAT" can be
         used to specify only natural (genetic) ancestors.
 
-        :type individual: Element
+        :type individual: Individual
         :type ancestor_type: str
         :rtype: list of Element
         """
         if not individual.is_individual():
-            raise ValueError("Operation only valid for elements with %s tag." % gedcom.tags.GEDCOM_TAG_INDIVIDUAL)
+            raise NotAnActualIndividualError(
+                "Operation only valid for elements with %s tag." % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+            )
+
         parents = self.get_parents(individual, ancestor_type)
         ancestors = []
         ancestors.extend(parents)
+
         for parent in parents:
             ancestors.extend(self.get_ancestors(parent))
+
         return ancestors
 
     def get_parents(self, individual, parent_type="ALL"):
@@ -351,14 +388,18 @@ class Gedcom:
         Optional parent_type. Default "ALL" returns all parents. "NAT" can be
         used to specify only natural (genetic) parents.
 
-        :type individual: Element
+        :type individual: Individual
         :type parent_type: str
-        :rtype: list of Element
+        :rtype: list of Individual
         """
         if not individual.is_individual():
-            raise ValueError("Operation only valid for elements with %s tag." % gedcom.tags.GEDCOM_TAG_INDIVIDUAL)
+            raise NotAnActualIndividualError(
+                "Operation only valid for elements with %s tag." % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+            )
+
         parents = []
         families = self.get_families(individual, gedcom.tags.GEDCOM_TAG_FAMILY_CHILD)
+
         for family in families:
             if parent_type == "NAT":
                 for family_member in family.get_child_elements():
@@ -371,6 +412,7 @@ class Gedcom:
                                     parents += self.get_family_members(family, gedcom.tags.GEDCOM_TAG_HUSBAND)
             else:
                 parents += self.get_family_members(family, "PARENTS")
+
         return parents
 
     def find_path_to_ancestor(self, descendant, ancestor, path=None):
@@ -378,9 +420,13 @@ class Gedcom:
         :rtype: object
         """
         if not descendant.is_individual() and ancestor.is_individual():
-            raise ValueError("Operation only valid for elements with %s tag." % gedcom.tags.GEDCOM_TAG_INDIVIDUAL)
+            raise NotAnActualIndividualError(
+                "Operation only valid for elements with %s tag." % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+            )
+
         if not path:
             path = [descendant]
+
         if path[-1].get_pointer() == ancestor.get_pointer():
             return path
         else:
@@ -389,42 +435,51 @@ class Gedcom:
                 potential_path = self.find_path_to_ancestor(parent, ancestor, path + [parent])
                 if potential_path is not None:
                     return potential_path
+
         return None
 
-    def get_family_members(self, family, members_type="ALL"):
+    def get_family_members(self, family, members_type=FAMILY_MEMBERS_TYPE_ALL):
         """Return array of family members: individual, spouse, and children
 
-        Optional argument `members_type` can be used to return specific subsets.
-        "ALL": Default, return all members of the family
-        "PARENTS": Return individuals with "HUSB" and "WIFE" tags (parents)
-        "HUSB": Return individuals with "HUSB" tags (father)
-        "WIFE": Return individuals with "WIFE" tags (mother)
-        "CHIL": Return individuals with "CHIL" tags (children)
+        Optional argument `members_type` can be used to return specific subsets:
 
-        :type family: Element
+        "FAMILY_MEMBERS_TYPE_ALL": Default, return all members of the family
+        "FAMILY_MEMBERS_TYPE_PARENTS": Return individuals with "HUSB" and "WIFE" tags (parents)
+        "FAMILY_MEMBERS_TYPE_HUSBAND": Return individuals with "HUSB" tags (father)
+        "FAMILY_MEMBERS_TYPE_WIFE": Return individuals with "WIFE" tags (mother)
+        "FAMILY_MEMBERS_TYPE_CHILDREN": Return individuals with "CHIL" tags (children)
+
+        :type family: Family
         :type members_type: str
-        :rtype: list of Element
+        :rtype: list of Individual
         """
         if not family.is_family():
-            raise ValueError("Operation only valid for element with %s tag." % gedcom.tags.GEDCOM_TAG_FAMILY)
+            raise NotAnActualFamilyError(
+                "Operation only valid for element with %s tag." % gedcom.tags.GEDCOM_TAG_FAMILY
+            )
+
         family_members = []
         element_dictionary = self.get_element_dictionary()
+
         for child_element in family.get_child_elements():
             # Default is ALL
             is_family = (child_element.get_tag() == gedcom.tags.GEDCOM_TAG_HUSBAND
                          or child_element.get_tag() == gedcom.tags.GEDCOM_TAG_WIFE
                          or child_element.get_tag() == gedcom.tags.GEDCOM_TAG_CHILD)
-            if members_type == "PARENTS":
+
+            if members_type == FAMILY_MEMBERS_TYPE_PARENTS:
                 is_family = (child_element.get_tag() == gedcom.tags.GEDCOM_TAG_HUSBAND
                              or child_element.get_tag() == gedcom.tags.GEDCOM_TAG_WIFE)
-            elif members_type == "HUSB":
+            elif members_type == FAMILY_MEMBERS_TYPE_HUSBAND:
                 is_family = child_element.get_tag() == gedcom.tags.GEDCOM_TAG_HUSBAND
-            elif members_type == "WIFE":
+            elif members_type == FAMILY_MEMBERS_TYPE_WIFE:
                 is_family = child_element.get_tag() == gedcom.tags.GEDCOM_TAG_WIFE
-            elif members_type == "CHIL":
+            elif members_type == FAMILY_MEMBERS_TYPE_CHILDREN:
                 is_family = child_element.get_tag() == gedcom.tags.GEDCOM_TAG_CHILD
+
             if is_family and child_element.get_value() in element_dictionary:
                 family_members.append(element_dictionary[child_element.get_value()])
+
         return family_members
 
     # Other methods

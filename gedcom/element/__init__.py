@@ -24,9 +24,9 @@
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
 __all__ = [
-    # Subpackages
     "element",
-    # Modules
-    "gedcom",
-    "tags"
+    "family",
+    "file",
+    "individual",
+    "object"
 ]

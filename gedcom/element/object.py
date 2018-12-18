@@ -23,10 +23,18 @@
 #
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
-__all__ = [
-    # Subpackages
-    "element",
-    # Modules
-    "gedcom",
-    "tags"
-]
+from gedcom.element.element import Element
+import gedcom.tags
+
+
+class NotAnActualObjectError(Exception):
+    pass
+
+
+class Object(Element):
+
+    def is_object(self):
+        """Check if this element is an actual object
+        :rtype: bool
+        """
+        return self.get_tag() == gedcom.tags.GEDCOM_TAG_OBJECT
