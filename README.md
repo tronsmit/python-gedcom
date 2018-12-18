@@ -26,11 +26,10 @@ simply append the `--pre` option to `pip`: `pip<version> install python-gedcom -
 
 ## Usage
 
-When successfully installed you may import the `gedcom` module and use
-it like so:
+When successfully installed you may import the `gedcom` package and use it like so:
 
 ```python
-from gedcom import Gedcom
+from gedcom.gedcom import Gedcom
 
 file_path = '' # Path to your `.ged` file
 gedcom = Gedcom(file_path)
@@ -38,10 +37,11 @@ gedcom = Gedcom(file_path)
 
 ### GEDCOM Quirks
 
-Large sites like Ancestry and MyHeritage (among others) don't always produce perfectly formatted GEDCOM files.  If you encounter errors in parsing, you might consider disabling strict parsing which will make a best effort to parse the file:
+Large sites like Ancestry and MyHeritage (among others) don't always produce perfectly formatted GEDCOM files.
+If you encounter errors in parsing, you might consider disabling strict parsing which will make a best effort to parse the file:
 
 ```python
-from gedcom import Gedcom
+from gedcom.gedcom import Gedcom
 
 file_path = '' # Path to your `.ged` file
 gedcom = Gedcom(file_path, False) # Disable strict parsing
@@ -55,6 +55,11 @@ Disabling strict parsing will allow the parser to gracefully handle the followin
 ### Iterate through all records, search last names and print matches
 
 ```python
+from gedcom.gedcom import Gedcom
+
+file_path = '' # Path to your `.ged` file
+gedcom = Gedcom(file_path)
+
 all_records = gedcom.get_root_child_elements()
 for record in all_records:
     if record.is_individual():
@@ -67,7 +72,9 @@ for record in all_records:
 
 The `Element` class contains all the information for a single record in the GEDCOM file, for example and individual.
 
-### `Element` methods
+### `Element` class
+
+> **Note**: May be imported via `from gedcom.element import Element`.
 
 Method | Parameters | Returns | Description
 -------|------------|---------|------------
@@ -102,7 +109,9 @@ Method | Parameters | Returns | Description
 `get_occupation`       | none | String | Returns the individual's occupation
 `get_individual`       | none | Individual | Returns the individual
 
-### `Gedcom` method
+### `Gedcom` class
+
+> **Note**: May be imported via `from gedcom.gedcom import Gedcom`.
 
 Method | Parameters | Returns | Description 
 -------|------------|---------|------------
@@ -129,10 +138,10 @@ I suggest using [pyenv](https://github.com/pyenv/pyenv) for local development.
 ### Running tests
 
 1. Run `pip<version> install --no-cache-dir -r requirements.txt` to install dependencies
-1. Run tests with [tox](https://tox.readthedocs.io/en/latest/index.html)
+1. Run tests with [tox](https://tox.readthedocs.io/en/latest/index.html) (`tox` in your console)
     * For Python 2.7 run `tox -e py27` (you need to have Python 2.7 installed)
-    * For Python 3.4 run `tox -e py34` (you need to have Python 3.6 installed)
-    * For Python 3.5 run `tox -e py35` (you need to have Python 3.6 installed)
+    * For Python 3.4 run `tox -e py34` (you need to have Python 3.4 installed)
+    * For Python 3.5 run `tox -e py35` (you need to have Python 3.5 installed)
     * For Python 3.6 run `tox -e py36` (you need to have Python 3.6 installed)
 
 ### Uploading a new package to PyPI
@@ -151,7 +160,8 @@ Daniel Zappala at Brigham Young University (Copyright (C) 2005) which
 was licensed under the GPL v2 and then continued by
 [Mad Price Ball](https://github.com/madprime) in 2012.
 
-Further updates by [Nicklas Reincke](https://github.com/nickreynke) and [Damon Brodie](https://github.com/nomadyow) in 2018.
+The project was taken over by [Nicklas Reincke](https://github.com/nickreynke) in 2018.
+Together with [Damon Brodie](https://github.com/nomadyow) a lot of changes were made and the parser was optimized.
 
 ## Changelog
 
