@@ -166,6 +166,23 @@ Together with [Damon Brodie](https://github.com/nomadyow) a lot of changes were 
 
 ## Changelog
 
+**v1.0.0**
+
+- Separated code of `__init__.py` into individual files, updating the package structure ([#15](https://github.com/nickreynke/python-gedcom/issues/15))
+
+> **Migrating from v0.2.x to v1.0.0**:
+>
+> The old way of importing the `gedcom` package was like this: `from gedcom import Gedcom`.
+>
+> The new package code is separated into individual modules within the package. So `Gedcom` would be imported like this:
+> `from gedcom.gedcom import Gedcom`, since the class `Gedcom` lies within the module `gedcom` within the package `gedcom`.
+>
+> Same procedure for the `Element` class: `from gedcom.element import Element`.
+>
+> This allows for better maintainability and scalability.
+>
+> If there are any questions or you encounter a bug please open an issue [here](https://github.com/nickreynke/python-gedcom/issues).
+
 **v0.2.5dev**
 
 - Updated project structure ([#18](https://github.com/nickreynke/python-gedcom/issues/18))
