@@ -10,8 +10,6 @@
     - Resulted in a new `parser.py` file containing the actual parser, a `element.py` containing the elements the parser can parse and a `tags.py` containing the used GEDCOM tags
 - Separated code of new `element.py` into individual modules extending the `Element` class within new submodule `element` to better
   differentiate between the type of `Element`s the parser parses (e.g. `FamilyElement`, `IndividualElement`, ...)
-- Deprecated `get_individual()` method within `Element` class and added new method `to_gedcom_string()` to convert an
-  element to a GEDCOM conform string.
 - Added `helpers.py` containing helper functions like a `@deprecated` annotation to annotate methods or classes as
   deprecated. (The helpers may be removed when its contents are no longer used within the project.)
 - GEDCOM file is no longer parsed within constructor of `Parser` class (the actual parser; it was named `Gedcom` before).
