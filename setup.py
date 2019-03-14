@@ -19,7 +19,7 @@ setup(
     author_email='contact@reynke.com',
     license='GPLv2',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Topic :: Sociology :: Genealogy',
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',

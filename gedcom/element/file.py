@@ -1,7 +1,7 @@
 # Python GEDCOM Parser
 #
 # Copyright (C) 2018 Damon Brodie (damon.brodie at gmail.com)
-# Copyright (C) 2018 Nicklas Reincke (contact at reynke.com)
+# Copyright (C) 2018-2019 Nicklas Reincke (contact at reynke.com)
 # Copyright (C) 2016 Andreas Oberritter
 # Copyright (C) 2012 Madeleine Price Ball
 # Copyright (C) 2005 Daniel Zappala (zappala at cs.byu.edu)
@@ -31,10 +31,10 @@ class NotAnActualFileError(Exception):
     pass
 
 
-class File(Element):
+class FileElement(Element):
 
     def is_file(self):
-        """Check if this element is an actual file
+        """Checks if this element is an actual file
         :rtype: bool
         """
         return self.get_tag() == gedcom.tags.GEDCOM_TAG_FILE

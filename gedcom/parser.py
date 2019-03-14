@@ -1,7 +1,7 @@
 # Python GEDCOM Parser
 #
 # Copyright (C) 2018 Damon Brodie (damon.brodie at gmail.com)
-# Copyright (C) 2018 Nicklas Reincke (contact at reynke.com)
+# Copyright (C) 2018-2019 Nicklas Reincke (contact at reynke.com)
 # Copyright (C) 2016 Andreas Oberritter
 # Copyright (C) 2012 Madeleine Price Ball
 # Copyright (C) 2005 Daniel Zappala (zappala at cs.byu.edu)
@@ -26,10 +26,11 @@
 import re as regex
 from sys import version_info
 from gedcom.element.element import Element
-from gedcom.element.family import Family, NotAnActualFamilyError
-from gedcom.element.file import File
-from gedcom.element.individual import Individual, NotAnActualIndividualError
-from gedcom.element.object import Object
+from gedcom.element.family import FamilyElement, NotAnActualFamilyError
+from gedcom.element.file import FileElement
+from gedcom.element.individual import IndividualElement, NotAnActualIndividualError
+from gedcom.element.object import ObjectElement
+from gedcom.element.root import RootElement
 import gedcom.tags
 
 FAMILY_MEMBERS_TYPE_ALL = "ALL"
@@ -43,7 +44,7 @@ class GedcomFormatViolationError(Exception):
     pass
 
 
-class Gedcom:
+class Parser:
     """Parses and manipulates GEDCOM 5.5 format data
 
     For documentation of the GEDCOM 5.5 format, see:
@@ -55,19 +56,15 @@ class Gedcom:
       - a dict (only elements with pointers, which are the keys)
     """
 
-    def __init__(self, file_path, use_strict=True):
-        """Initialize a GEDCOM data object. You must supply a GEDCOM file
-        :type file_path: str
-        """
+    def __init__(self):
+        """Initialize a GEDCOM data object."""
         self.__element_list = []
         self.__element_dictionary = {}
-        self.invalidate_cache()
-        self.__root_element = Element(-1, "", "ROOT", "")
-        self.__parse(file_path, use_strict)
-        self.__use_strict = use_strict
+        self.__root_element = RootElement()
 
     def invalidate_cache(self):
-        """Cause get_element_list() and get_element_dictionary() to return updated data
+        """Empties the element list and dictionary to cause
+        `get_element_list()` and `get_element_dictionary()` to return updated data
 
         The update gets deferred until each of the methods actually gets called.
         """
@@ -75,12 +72,12 @@ class Gedcom:
         self.__element_dictionary = {}
 
     def get_element_list(self):
-        """Return a list of all the elements in the GEDCOM file
+        """Returns a list containing all elements from within the GEDCOM file
 
         By default elements are in the same order as they appeared in the file.
 
         This list gets generated on-the-fly, but gets cached. If the database
-        was modified, you should call invalidate_cache() once to let this
+        was modified, you should call `invalidate_cache()` once to let this
         method return updated data.
 
         Consider using `get_root_element()` or `get_root_child_elements()` to access
@@ -94,13 +91,13 @@ class Gedcom:
         return self.__element_list
 
     def get_element_dictionary(self):
-        """Return a dictionary of elements from the GEDCOM file
+        """Returns a dictionary containing all elements, identified by a pointer, from within the GEDCOM file
 
         Only elements identified by a pointer are listed in the dictionary.
         The keys for the dictionary are the pointers.
 
         This dictionary gets generated on-the-fly, but gets cached. If the
-        database was modified, you should call invalidate_cache() once to let
+        database was modified, you should call `invalidate_cache()` once to let
         this method return updated data.
 
         :rtype: dict of Element
@@ -117,12 +114,12 @@ class Gedcom:
 
         When printed, this element converts to an empty string.
 
-        :rtype: Element
+        :rtype: RootElement
         """
         return self.__root_element
 
     def get_root_child_elements(self):
-        """Return a list of logical records in the GEDCOM file
+        """Returns a list of logical records in the GEDCOM file
 
         By default, elements are in the same order as they appeared in the file.
 
@@ -130,21 +127,26 @@ class Gedcom:
         """
         return self.get_root_element().get_child_elements()
 
-    # Private methods
-
-    def __parse(self, file_path, use_strict=True):
-        """Open and parse file path as GEDCOM 5.5 formatted data
+    def parse_file(self, file_path, strict=True):
+        """Opens and parses a file, from the given file path, as GEDCOM 5.5 formatted data
         :type file_path: str
+        :type strict: bool
         """
+        self.invalidate_cache()
+        self.__root_element = RootElement()
+
         gedcom_file = open(file_path, 'rb')
         line_number = 1
-        last_element = self.__root_element
+        last_element = self.get_root_element()
+
         for line in gedcom_file:
-            last_element = self.__parse_line(line_number, line.decode('utf-8-sig'), last_element, use_strict)
+            last_element = self.__parse_line(line_number, line.decode('utf-8-sig'), last_element, strict)
             line_number += 1
 
+    # Private methods
+
     @staticmethod
-    def __parse_line(line_number, line, last_element, use_strict=True):
+    def __parse_line(line_number, line, last_element, strict=True):
         """Parse a line from a GEDCOM 5.5 formatted document
 
         Each line should have the following (bracketed items optional):
@@ -153,6 +155,8 @@ class Gedcom:
         :type line_number: int
         :type line: str
         :type last_element: Element
+        :type strict: bool
+
         :rtype: Element
         """
 
@@ -162,7 +166,7 @@ class Gedcom:
         # Pointer optional, if it exists it must be flanked by `@`
         pointer_regex = '(@[^@]+@ |)'
 
-        # Tag must be alphanumeric string
+        # Tag must be an alphanumeric string
         tag_regex = '([A-Za-z0-9_]+)'
 
         # Value optional, consists of anything after a space to end of line
@@ -176,7 +180,7 @@ class Gedcom:
         regex_match = regex.match(gedcom_line_regex, line)
 
         if regex_match is None:
-            if use_strict:
+            if strict:
                 error_message = ("Line %d of document violates GEDCOM format 5.5" % line_number
                                  + "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
                 raise GedcomFormatViolationError(error_message)
@@ -227,13 +231,13 @@ class Gedcom:
 
         # Create element. Store in list and dict, create children and parents.
         if tag == gedcom.tags.GEDCOM_TAG_INDIVIDUAL:
-            element = Individual(level, pointer, tag, value, crlf, multi_line=False)
+            element = IndividualElement(level, pointer, tag, value, crlf, multi_line=False)
         elif tag == gedcom.tags.GEDCOM_TAG_FAMILY:
-            element = Family(level, pointer, tag, value, crlf, multi_line=False)
+            element = FamilyElement(level, pointer, tag, value, crlf, multi_line=False)
         elif tag == gedcom.tags.GEDCOM_TAG_FILE:
-            element = File(level, pointer, tag, value, crlf, multi_line=False)
+            element = FileElement(level, pointer, tag, value, crlf, multi_line=False)
         elif tag == gedcom.tags.GEDCOM_TAG_OBJECT:
-            element = Object(level, pointer, tag, value, crlf, multi_line=False)
+            element = ObjectElement(level, pointer, tag, value, crlf, multi_line=False)
         else:
             element = Element(level, pointer, tag, value, crlf, multi_line=False)
 
@@ -260,12 +264,12 @@ class Gedcom:
     # Methods for analyzing individuals and relationships between individuals
 
     def get_marriages(self, individual):
-        """Return list of marriage tuples (date, place) for an individual
-        :type individual: Individual
+        """Returns a list of marriages of an individual formatted as a tuple (`str` date, `str` place)
+        :type individual: IndividualElement
         :rtype: tuple
         """
         marriages = []
-        if not individual.is_individual():
+        if not isinstance(individual, IndividualElement):
             raise NotAnActualIndividualError(
                 "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
             )
@@ -285,15 +289,17 @@ class Gedcom:
         return marriages
 
     def get_marriage_years(self, individual):
-        """Return list of marriage years (as int) for an individual
-        :type individual: Individual
+        """Returns a list of marriage years (as integers) for an individual
+        :type individual: IndividualElement
         :rtype: list of int
         """
         dates = []
-        if not individual.is_individual():
+
+        if not isinstance(individual, IndividualElement):
             raise NotAnActualIndividualError(
                 "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
             )
+
         # Get and analyze families where individual is spouse.
         families = self.get_families(individual, gedcom.tags.GEDCOM_TAG_FAMILY_SPOUSE)
         for family in families:
@@ -309,21 +315,31 @@ class Gedcom:
         return dates
 
     def marriage_year_match(self, individual, year):
-        """Check if one of the marriage years of an individual matches the supplied year. Year is an integer.
-        :type individual: Individual
+        """Checks if one of the marriage years of an individual matches the supplied year. Year is an integer.
+        :type individual: IndividualElement
         :type year: int
         :rtype: bool
         """
+        if not isinstance(individual, IndividualElement):
+            raise NotAnActualIndividualError(
+                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+            )
+
         years = self.get_marriage_years(individual)
         return year in years
 
     def marriage_range_match(self, individual, from_year, to_year):
         """Check if one of the marriage years of an individual is in a given range. Years are integers.
-        :type individual: Individual
+        :type individual: IndividualElement
         :type from_year: int
         :type to_year: int
         :rtype: bool
         """
+        if not isinstance(individual, IndividualElement):
+            raise NotAnActualIndividualError(
+                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+            )
+
         years = self.get_marriage_years(individual)
         for year in years:
             if from_year <= year <= to_year:
@@ -337,13 +353,13 @@ class Gedcom:
         `gedcom.tags.GEDCOM_TAG_FAMILY_CHILD` (families where the individual is a child). If a value is not
         provided, `gedcom.tags.GEDCOM_TAG_FAMILY_SPOUSE` is default value.
 
-        :type individual: Individual
+        :type individual: IndividualElement
         :type family_type: str
-        :rtype: list of Family
+        :rtype: list of FamilyElement
         """
-        if not individual.is_individual():
+        if not isinstance(individual, IndividualElement):
             raise NotAnActualIndividualError(
-                "Operation only valid for elements with %s tag." % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
             )
 
         families = []
@@ -364,13 +380,13 @@ class Gedcom:
         Optional `ancestor_type`. Default "ALL" returns all ancestors, "NAT" can be
         used to specify only natural (genetic) ancestors.
 
-        :type individual: Individual
+        :type individual: IndividualElement
         :type ancestor_type: str
         :rtype: list of Element
         """
-        if not individual.is_individual():
+        if not isinstance(individual, IndividualElement):
             raise NotAnActualIndividualError(
-                "Operation only valid for elements with %s tag." % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
             )
 
         parents = self.get_parents(individual, ancestor_type)
@@ -388,13 +404,13 @@ class Gedcom:
         Optional parent_type. Default "ALL" returns all parents. "NAT" can be
         used to specify only natural (genetic) parents.
 
-        :type individual: Individual
+        :type individual: IndividualElement
         :type parent_type: str
-        :rtype: list of Individual
+        :rtype: list of IndividualElement
         """
-        if not individual.is_individual():
+        if not isinstance(individual, IndividualElement):
             raise NotAnActualIndividualError(
-                "Operation only valid for elements with %s tag." % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
             )
 
         parents = []
@@ -403,7 +419,10 @@ class Gedcom:
         for family in families:
             if parent_type == "NAT":
                 for family_member in family.get_child_elements():
-                    if family_member.get_tag() == gedcom.tags.GEDCOM_TAG_CHILD and family_member.get_value() == individual.get_pointer():
+
+                    if family_member.get_tag() == gedcom.tags.GEDCOM_TAG_CHILD \
+                       and family_member.get_value() == individual.get_pointer():
+
                         for child in family_member.get_child_elements():
                             if child.get_value() == "Natural":
                                 if child.get_tag() == gedcom.tags.GEDCOM_PROGRAM_DEFINED_TAG_MREL:
@@ -419,7 +438,7 @@ class Gedcom:
         """Return path from descendant to ancestor
         :rtype: object
         """
-        if not descendant.is_individual() and ancestor.is_individual():
+        if not isinstance(descendant, IndividualElement) and isinstance(ancestor, IndividualElement):
             raise NotAnActualIndividualError(
                 "Operation only valid for elements with %s tag." % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
             )
@@ -449,11 +468,11 @@ class Gedcom:
         "FAMILY_MEMBERS_TYPE_WIFE": Return individuals with "WIFE" tags (mother)
         "FAMILY_MEMBERS_TYPE_CHILDREN": Return individuals with "CHIL" tags (children)
 
-        :type family: Family
+        :type family: FamilyElement
         :type members_type: str
-        :rtype: list of Individual
+        :rtype: list of IndividualElement
         """
-        if not family.is_family():
+        if not isinstance(family, FamilyElement):
             raise NotAnActualFamilyError(
                 "Operation only valid for element with %s tag." % gedcom.tags.GEDCOM_TAG_FAMILY
             )
@@ -494,6 +513,6 @@ class Gedcom:
         :type open_file: file
         """
         if version_info[0] >= 3:
-            open_file.write(self.get_root_element().get_individual())
+            open_file.write(self.get_root_element().to_gedcom_string(True))
         else:
-            open_file.write(self.get_root_element().get_individual().encode('utf-8'))
+            open_file.write(self.get_root_element().to_gedcom_string(True).encode('utf-8-sig'))

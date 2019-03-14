@@ -1,7 +1,7 @@
 # Python GEDCOM Parser
 #
 # Copyright (C) 2018 Damon Brodie (damon.brodie at gmail.com)
-# Copyright (C) 2018 Nicklas Reincke (contact at reynke.com)
+# Copyright (C) 2018-2019 Nicklas Reincke (contact at reynke.com)
 # Copyright (C) 2016 Andreas Oberritter
 # Copyright (C) 2012 Madeleine Price Ball
 # Copyright (C) 2005 Daniel Zappala (zappala at cs.byu.edu)
@@ -25,6 +25,7 @@
 
 import re as regex
 from gedcom.element.element import Element
+from gedcom.helpers import deprecated
 import gedcom.tags
 
 
@@ -32,72 +33,29 @@ class NotAnActualIndividualError(Exception):
     pass
 
 
-class Individual(Element):
+class IndividualElement(Element):
 
     def is_individual(self):
-        """Check if this element is an actual individual
+        """Checks if this element is an actual individual
         :rtype: bool
         """
         return self.get_tag() == gedcom.tags.GEDCOM_TAG_INDIVIDUAL
 
-    def get_name(self):
-        """Return a person's names as a tuple: (first, last)
-        :rtype: tuple
+    def is_deceased(self):
+        """Checks if this individual is deceased
+        :rtype: bool
         """
-        first = ""
-        last = ""
-
         if not self.is_individual():
-            return first, last
-
-        # Return the first gedcom.tags.GEDCOM_TAG_NAME that is found.  Alternatively
-        # as soon as we have both the gedcom.tags.GEDCOM_TAG_GIVEN_NAME and _SURNAME return those
-        found_given_name = False
-        found_surname_name = False
+            return False
 
         for child in self.get_child_elements():
-            if child.get_tag() == gedcom.tags.GEDCOM_TAG_NAME:
-                # some GEDCOM files don't use child tags but instead
-                # place the name in the value of the NAME tag
-                if child.get_value() != "":
-                    name = child.get_value().split('/')
-                    if len(name) > 0:
-                        first = name[0].strip()
-                        if len(name) > 1:
-                            last = name[1].strip()
-                    return first, last
-                else:
-                    for childOfChild in child.get_child_elements():
-                        if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_GIVEN_NAME:
-                            first = childOfChild.get_value()
-                            found_given_name = True
-                        if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_SURNAME:
-                            last = childOfChild.get_value()
-                            found_surname_name = True
-                    if found_given_name and found_surname_name:
-                        return first, last
+            if child.get_tag() == gedcom.tags.GEDCOM_TAG_DEATH:
+                return True
 
-        # If we reach here we are probably returning empty strings
-        return first, last
-
-    def surname_match(self, name):
-        """Match a string with the surname of an individual
-        :type name: str
-        :rtype: bool
-        """
-        (given_name, surname) = self.get_name()
-        return regex.search(name, surname, regex.IGNORECASE)
-
-    def given_match(self, name):
-        """Match a string with the given names of an individual
-        :type name: str
-        :rtype: bool
-        """
-        (given_name, surname) = self.get_name()
-        return regex.search(name, given_name, regex.IGNORECASE)
+        return False
 
     def is_child(self):
-        """Check if this element is a child within a family
+        """Checks if this element is a child of a family
         :rtype: bool
         """
         if not self.is_individual():
@@ -114,24 +72,92 @@ class Individual(Element):
         return found_child
 
     def is_private(self):
-        """Return if the person is marked private in boolean format
+        """Checks if this individual is marked private
         :rtype: bool
         """
-        private = False
-
         if not self.is_individual():
-            return private
+            return False
 
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_PRIVATE:
                 private = child.get_value()
                 if private == 'Y':
-                    private = True
+                    return True
 
-        return private
+        return False
+
+    def get_name(self):
+        """Returns an individual's names as a tuple: (`str` given_name, `str` surname)
+        :rtype: tuple
+        """
+        given_name = ""
+        surname = ""
+
+        if not self.is_individual():
+            return given_name, surname
+
+        # Return the first gedcom.tags.GEDCOM_TAG_NAME that is found.
+        # Alternatively as soon as we have both the gedcom.tags.GEDCOM_TAG_GIVEN_NAME and _SURNAME return those.
+        found_given_name = False
+        found_surname_name = False
+
+        for child in self.get_child_elements():
+            if child.get_tag() == gedcom.tags.GEDCOM_TAG_NAME:
+                # Some GEDCOM files don't use child tags but instead
+                # place the name in the value of the NAME tag.
+                if child.get_value() != "":
+                    name = child.get_value().split('/')
+
+                    if len(name) > 0:
+                        given_name = name[0].strip()
+                        if len(name) > 1:
+                            surname = name[1].strip()
+
+                    return given_name, surname
+
+                for childOfChild in child.get_child_elements():
+
+                    if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_GIVEN_NAME:
+                        given_name = childOfChild.get_value()
+                        found_given_name = True
+
+                    if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_SURNAME:
+                        surname = childOfChild.get_value()
+                        found_surname_name = True
+
+                if found_given_name and found_surname_name:
+                    return given_name, surname
+
+        # If we reach here we are probably returning empty strings
+        return given_name, surname
+
+    def surname_match(self, surname_to_match):
+        """Matches a string with the surname of an individual
+        :type surname_to_match: str
+        :rtype: bool
+        """
+        (given_name, surname) = self.get_name()
+        return regex.search(surname_to_match, surname, regex.IGNORECASE)
+
+    @deprecated
+    def given_match(self, name):
+        """Matches a string with the given name of an individual
+        ::deprecated:: As of version 1.0.0 use `given_name_match()` method instead
+        :type name: str
+        :rtype: bool
+        """
+        return self.given_name_match(name)
+
+    def given_name_match(self, given_name_to_match):
+        """Matches a string with the given name of an individual
+        :type given_name_to_match: str
+        :rtype: bool
+        """
+        (given_name, surname) = self.get_name()
+        return regex.search(given_name_to_match, given_name, regex.IGNORECASE)
 
     def get_gender(self):
-        """Return the gender of a person in string format
+        """Returns the gender of a person in string format
         :rtype: str
         """
         gender = ""
@@ -146,7 +172,7 @@ class Individual(Element):
         return gender
 
     def get_birth_data(self):
-        """Return the birth tuple of a person as (date, place, sources)
+        """Returns the birth data of a person formatted as a tuple: (`str` date, `str` place, `list` sources)
         :rtype: tuple
         """
         date = ""
@@ -159,17 +185,20 @@ class Individual(Element):
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_BIRTH:
                 for childOfChild in child.get_child_elements():
+
                     if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_DATE:
                         date = childOfChild.get_value()
+
                     if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_PLACE:
                         place = childOfChild.get_value()
+
                     if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_SOURCE:
                         sources.append(childOfChild.get_value())
 
         return date, place, sources
 
     def get_birth_year(self):
-        """Return the birth year of a person in integer format
+        """Returns the birth year of a person in integer format
         :rtype: int
         """
         date = ""
@@ -192,7 +221,7 @@ class Individual(Element):
             return -1
 
     def get_death_data(self):
-        """Return the death tuple of a person as (date, place, sources)
+        """Returns the death data of a person formatted as a tuple: (`str` date, `str` place, `list` sources)
         :rtype: tuple
         """
         date = ""
@@ -215,7 +244,7 @@ class Individual(Element):
         return date, place, sources
 
     def get_death_year(self):
-        """Return the death year of a person in integer format
+        """Returns the death year of a person in integer format
         :rtype: int
         """
         date = ""
@@ -237,8 +266,16 @@ class Individual(Element):
         except ValueError:
             return -1
 
+    @deprecated
     def get_burial(self):
-        """Return the burial tuple of a person as (date, place, sources)
+        """Returns the burial data of a person formatted as a tuple: (`str` date, `str´ place, `list` sources)
+        ::deprecated:: As of version 1.0.0 use `get_burial_data()` method instead
+        :rtype: tuple
+        """
+        self.get_burial_data()
+
+    def get_burial_data(self):
+        """Returns the burial data of a person formatted as a tuple: (`str` date, `str´ place, `list` sources)
         :rtype: tuple
         """
         date = ""
@@ -251,18 +288,29 @@ class Individual(Element):
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_BURIAL:
                 for childOfChild in child.get_child_elements():
+
                     if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_DATE:
                         date = childOfChild.get_value()
+
                     if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_PLACE:
                         place = childOfChild.get_value()
+
                     if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_SOURCE:
                         sources.append(childOfChild.get_value())
 
         return date, place, sources
 
+    @deprecated
     def get_census(self):
-        """Return list of census tuples (date, place, sources) for an individual
-        :rtype: tuple
+        """Returns a list of censuses of an individual formatted as tuples: (`str` date, `str´ place, `list` sources)
+        ::deprecated:: As of version 1.0.0 use `get_census_data()` method instead
+        :rtype: list of tuple
+        """
+        self.get_census_data()
+
+    def get_census_data(self):
+        """Returns a list of censuses of an individual formatted as tuples: (`str` date, `str´ place, `list` sources)
+        :rtype: list of tuple
         """
         census = []
 
@@ -279,10 +327,13 @@ class Individual(Element):
                 sources = []
 
                 for childOfChild in child.get_child_elements():
+
                     if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_DATE:
                         date = childOfChild.get_value()
+
                     if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_PLACE:
                         place = childOfChild.get_value()
+
                     if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_SOURCE:
                         sources.append(childOfChild.get_value())
 
@@ -291,7 +342,7 @@ class Individual(Element):
         return census
 
     def get_last_change_date(self):
-        """Return the last updated date of a person as (date)
+        """Returns the date of when the person data was last changed formatted as a string
         :rtype: str
         """
         date = ""
@@ -308,7 +359,7 @@ class Individual(Element):
         return date
 
     def get_occupation(self):
-        """Return the occupation of a person as (date)
+        """Returns the occupation of a person
         :rtype: str
         """
         occupation = ""
@@ -322,28 +373,15 @@ class Individual(Element):
 
         return occupation
 
-    def is_deceased(self):
-        """Check if a person is deceased
-        :rtype: bool
-        """
-        if not self.is_individual():
-            return False
-
-        for child in self.get_child_elements():
-            if child.get_tag() == gedcom.tags.GEDCOM_TAG_DEATH:
-                return True
-
-        return False
-
     def birth_year_match(self, year):
-        """Match the birth year of an individual
+        """Returns `True` if the given year matches the birth year of this person
         :type year: int
         :rtype: bool
         """
         return self.get_birth_year() == year
 
     def birth_range_match(self, from_year, to_year):
-        """Check if the birth year of an individual is in a given range
+        """Checks if the birth year of a person lies within the given range
         :type from_year: int
         :type to_year: int
         :rtype: bool
@@ -356,14 +394,14 @@ class Individual(Element):
         return False
 
     def death_year_match(self, year):
-        """Match the death year of an individual.
+        """Returns `True` if the given year matches the death year of this person
         :type year: int
         :rtype: bool
         """
         return self.get_death_year() == year
 
     def death_range_match(self, from_year, to_year):
-        """Check if the death year of an individual is in a given range. Years are integers
+        """Checks if the death year of a person lies within the given range
         :type from_year: int
         :type to_year: int
         :rtype: bool
@@ -376,28 +414,26 @@ class Individual(Element):
         return False
 
     def criteria_match(self, criteria):
-        """Check in this element matches all of the given criteria
+        """Checks if this individual matches all of the given criteria
 
         `criteria` is a colon-separated list, where each item in the
         list has the form [name]=[value]. The following criteria are supported:
 
         surname=[name]
-             Match a person with [name] in any part of the surname.
-        name=[name]
-             Match a person with [name] in any part of the given name.
+             Match a person with [name] in any part of the `surname`.
+        given_name=[given_name]
+             Match a person with [given_name] in any part of the given `given_name`.
         birth=[year]
              Match a person whose birth year is a four-digit [year].
         birth_range=[from_year-to_year]
              Match a person whose birth year is in the range of years from
              [from_year] to [to_year], including both [from_year] and [to_year].
-        death=[year]
-        death_range=[from_year-to_year]
 
         :type criteria: str
         :rtype: bool
         """
 
-        # Check if criteria is a valid criteria
+        # Check if criteria is a valid criteria and can be split by `:` and `=` characters
         try:
             for criterion in criteria.split(':'):
                 criterion.split('=')
@@ -411,7 +447,7 @@ class Individual(Element):
 
             if key == "surname" and not self.surname_match(value):
                 match = False
-            elif key == "name" and not self.given_match(value):
+            elif key == "name" and not self.given_name_match(value):
                 match = False
             elif key == "birth":
 
