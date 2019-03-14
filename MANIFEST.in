@@ -1,4 +1,4 @@
-# Include the README
+# Include the README and the CHANGELOG
 include *.md
 
 # Include the license file
