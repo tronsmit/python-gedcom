@@ -1,2 +1,6 @@
-def test_success():
-    assert True
+from gedcom.parser import Parser
+
+
+def test_initialization():
+    parser = Parser()
+    assert isinstance(parser, Parser)

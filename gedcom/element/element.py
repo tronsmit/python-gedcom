@@ -24,10 +24,6 @@
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
 from sys import version_info
-from gedcom.element.family import FamilyElement
-from gedcom.element.file import FileElement
-from gedcom.element.individual import IndividualElement
-from gedcom.element.object import ObjectElement
 from gedcom.helpers import deprecated
 import gedcom.tags
 
@@ -214,6 +210,11 @@ class Element:
         :type value: str
         :rtype: Element
         """
+        from gedcom.element.family import FamilyElement
+        from gedcom.element.file import FileElement
+        from gedcom.element.individual import IndividualElement
+        from gedcom.element.object import ObjectElement
+
         # Differentiate between the type of the new child element
         if tag == gedcom.tags.GEDCOM_TAG_FAMILY:
             child_element = FamilyElement(self.get_level() + 1, pointer, tag, value, self.__crlf)
