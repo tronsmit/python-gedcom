@@ -32,4 +32,4 @@ class RootElement(Element):
     """Virtual GEDCOM root element containing all logical records as children"""
 
     def __init__(self, level=-1, pointer="", tag="ROOT", value="", crlf="\n", multi_line=True):
-        super().__init__(level, pointer, tag, value, crlf, multi_line)
+        super(RootElement, self).__init__(level, pointer, tag, value, crlf, multi_line)

@@ -46,7 +46,7 @@ class GedcomFormatViolationError(Exception):
     pass
 
 
-class Parser:
+class Parser(object):
     """Parses and manipulates GEDCOM 5.5 format data
 
     For documentation of the GEDCOM 5.5 format, see:

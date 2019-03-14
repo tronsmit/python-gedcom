@@ -30,7 +30,7 @@ from gedcom.helpers import deprecated
 import gedcom.tags
 
 
-class Element:
+class Element(object):
     """GEDCOM element
 
     Each line in a GEDCOM file is an element with the format
