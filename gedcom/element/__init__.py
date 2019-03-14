@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Python GEDCOM Parser
 #
 # Copyright (C) 2018 Damon Brodie (damon.brodie at gmail.com)

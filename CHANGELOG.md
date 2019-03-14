@@ -5,6 +5,7 @@
 ### Changes:
 
 - Added `CHANGELOG.md`
+- Set source code encoding to UTF-8 explicitly, since for Python 2 ASCII would be the default. For Python 3 the default is UTF-8.
 - Separated code of `__init__.py` into individual files, updating the package structure ([#15](https://github.com/nickreynke/python-gedcom/issues/15))
     - Resulted in a new `parser.py` file containing the actual parser, a `element.py` containing the elements the parser can parse and a `tags.py` containing the used GEDCOM tags
 - Separated code of new `element.py` into individual modules extending the `Element` class within new submodule `element` to better
