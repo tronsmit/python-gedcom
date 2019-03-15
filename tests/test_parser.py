@@ -7,6 +7,19 @@ def test_initialization():
     assert isinstance(parser, Parser)
 
 
+def test_invalidate_cache():
+    parser = Parser()
+    parser.parse_file('tests/files/Musterstammbaum.ged')
+
+    assert len(parser.get_element_list()) == 396
+    assert len(parser.get_element_dictionary()) == 32
+
+    parser.invalidate_cache()
+
+    assert len(parser.get_element_list()) == 396
+    assert len(parser.get_element_dictionary()) == 32
+
+
 def test_parse_file():
     parser = Parser()
     parser.parse_file('tests/files/Musterstammbaum.ged')
