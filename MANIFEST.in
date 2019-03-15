@@ -6,3 +6,6 @@ include LICENSE.txt
 
 # Include the `requirements.txt` file
 include requirements.txt
+
+# Include GEDCOM test files
+include tests/files/*.ged
