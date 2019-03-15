@@ -11,6 +11,8 @@ A Python module for parsing, analyzing, and manipulating GEDCOM files.
 GEDCOM files contain ancestry data. The parser is currently supporting
 the GEDCOM 5.5 format which is detailed [here](https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf).
 
+> For the latest changes please have a look at the [`CHANGELOG.md`](CHANGELOG.md) file.
+>
 > The current development process can be tracked in the [develop branch](https://github.com/nickreynke/python-gedcom/tree/develop).
 
 ## Installation
@@ -215,6 +217,10 @@ I suggest using [pyenv](https://github.com/pyenv/pyenv) for local development.
 
 > When the package is ready to be published to the real Python Package Index
 the `repository-url` is `https://upload.pypi.org/legacy/`.
+
+## Changelog
+
+Please have a look at the [`CHANGELOG.md`](CHANGELOG.md) file.
 
 ## History
 
