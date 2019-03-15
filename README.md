@@ -23,23 +23,45 @@ to upgrade to the newest version uploaded to the [PyPI repository](https://pypi.
 If you want to use the latest pre-release of the `python-gedcom` package,
 simply append the `--pre` option to `pip`: `pip<version> install python-gedcom --pre`
 
-## Usage
+## Example usage
+
+> **For more examples:**
+> Please have a look at the test files found in the `tests/` directory.
 
 When successfully installed you may import the `gedcom` package and use it like so:
 
 ```python
+from gedcom.element.individual import IndividualElement
 from gedcom.parser import Parser
 
-file_path = '' # Path to your `.ged` file
+# Path to your `.ged` file
+file_path = ''
 
+# Initialize the parser
 gedcom_parser = Parser()
+
+# Parse your file
 gedcom_parser.parse_file(file_path)
 
-all_elements = gedcom_parser.get_root_child_elements()
-# ...
+root_child_elements = gedcom_parser.get_root_child_elements()
+
+# Iterate through all root child elements
+for element in root_child_elements:
+
+    # Is the `element` an actual `IndividualElement`? (Allows usage of extra functions such as `surname_match` and `get_name`.)
+    if isinstance(element, IndividualElement):
+
+        # Get all individuals whose surname matches "Doe"
+        if element.surname_match('Doe'):
+
+            # Unpack the name tuple
+            (first, last) = element.get_name()
+
+            # Print the first and last name of the found individual
+            print(first + " " + last)
 ```
 
-### Strict parsing
+## Strict parsing
 
 Large sites like Ancestry and MyHeritage (among others) don't always produce perfectly formatted GEDCOM files.
 If you encounter errors in parsing, you might consider disabling strict parsing which is enabled by default:
@@ -57,29 +79,6 @@ Disabling strict parsing will allow the parser to gracefully handle the followin
 
 - Multi-line fields that don't use `CONC` or `CONT`
 - Handle the last line not ending in a CRLF (`\r\n`)
-
-### Example: Iterate through all records, search last names and print matches
-
-```python
-from gedcom.parser import Parser
-from gedcom.element.individual import IndividualElement
-
-file_path = '' # Path to your `.ged` file
-
-gedcom_parser = Parser()
-gedcom_parser.parse_file(file_path)
-
-all_elements = gedcom_parser.get_root_child_elements()
-
-for element in all_elements:
-
-    # Is `record` an actual `IndividualElement`? (Allows usage of extra functions such as `surname_match` and `get_name.)
-    if isinstance(element, IndividualElement):
-    
-        if element.surname_match('Brodie'):
-            (first, last) = element.get_name()
-            print(first + " " + last)
-```
 
 ## Reference
 
