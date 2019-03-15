@@ -12,13 +12,13 @@ def test_invalidate_cache():
     parser = Parser()
     parser.parse_file('tests/files/Musterstammbaum.ged')
 
-    assert len(parser.get_element_list()) is 396
-    assert len(parser.get_element_dictionary()) is 32
+    assert len(parser.get_element_list()) == 396
+    assert len(parser.get_element_dictionary()) == 32
 
     parser.invalidate_cache()
 
-    assert len(parser.get_element_list()) is 396
-    assert len(parser.get_element_dictionary()) is 32
+    assert len(parser.get_element_list()) == 396
+    assert len(parser.get_element_dictionary()) == 32
 
 
 def test_get_root_element():
@@ -28,7 +28,12 @@ def test_get_root_element():
 
 def test_parse_file():
     parser = Parser()
+
+    assert len(parser.get_root_child_elements()) == 0
+
     parser.parse_file('tests/files/Musterstammbaum.ged')
+
+    assert len(parser.get_root_child_elements()) == 34
 
     individuals_in_root_child_elements = 0
     individuals_in_element_list = 0
@@ -41,9 +46,8 @@ def test_parse_file():
         if isinstance(element, IndividualElement):
             individuals_in_element_list += 1
 
-    assert individuals_in_root_child_elements is 20
-    assert individuals_in_element_list is 20
-    assert len(parser.get_root_child_elements()) is 34
+    assert individuals_in_root_child_elements == 20
+    assert individuals_in_element_list == 20
 
 
 def test___parse_line():
