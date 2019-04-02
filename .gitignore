@@ -1,6 +1,9 @@
 # Ignore .ged files
 *.ged
 
+# Unignore .ged test files
+!tests/files/*.ged
+
 # Due to using tox
 .tox
 

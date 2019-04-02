@@ -11,8 +11,9 @@ A Python module for parsing, analyzing, and manipulating GEDCOM files.
 GEDCOM files contain ancestry data. The parser is currently supporting
 the GEDCOM 5.5 format which is detailed [here](https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf).
 
-> **NOTE**: This module is currently under development and **should not be used in production** yet!
-> The current development process can be tracked in the ["develop" branch](https://github.com/reynke/python-gedcom/tree/develop).
+> For the latest changes please have a look at the [`CHANGELOG.md`](CHANGELOG.md) file.
+>
+> The current development process can be tracked in the [develop branch](https://github.com/nickreynke/python-gedcom/tree/develop).
 
 ## Installation
 
@@ -24,103 +25,176 @@ to upgrade to the newest version uploaded to the [PyPI repository](https://pypi.
 If you want to use the latest pre-release of the `python-gedcom` package,
 simply append the `--pre` option to `pip`: `pip<version> install python-gedcom --pre`
 
-## Usage
+## Example usage
 
-When successfully installed you may import the `gedcom` module and use
-it like so:
+> **For more examples:**
+> Please have a look at the test files found in the `tests/` directory.
+
+When successfully installed you may import the `gedcom` package and use it like so:
 
 ```python
-from gedcom import Gedcom
+from gedcom.element.individual import IndividualElement
+from gedcom.parser import Parser
 
-file_path = '' # Path to your `.ged` file
-gedcom = Gedcom(file_path)
+# Path to your `.ged` file
+file_path = ''
+
+# Initialize the parser
+gedcom_parser = Parser()
+
+# Parse your file
+gedcom_parser.parse_file(file_path)
+
+root_child_elements = gedcom_parser.get_root_child_elements()
+
+# Iterate through all root child elements
+for element in root_child_elements:
+
+    # Is the `element` an actual `IndividualElement`? (Allows usage of extra functions such as `surname_match` and `get_name`.)
+    if isinstance(element, IndividualElement):
+
+        # Get all individuals whose surname matches "Doe"
+        if element.surname_match('Doe'):
+
+            # Unpack the name tuple
+            (first, last) = element.get_name()
+
+            # Print the first and last name of the found individual
+            print(first + " " + last)
 ```
 
-### GEDCOM Quirks
+## Strict parsing
 
-Large sites like Ancestry and MyHeritage (among others) don't always produce perfectly formatted GEDCOM files.  If you encounter errors in parsing, you might consider disabling strict parsing which will make a best effort to parse the file:
+Large sites like Ancestry and MyHeritage (among others) don't always produce perfectly formatted GEDCOM files.
+If you encounter errors in parsing, you might consider disabling strict parsing which is enabled by default:
 
 ```python
-from gedcom import Gedcom
+from gedcom.parser import Parser
 
 file_path = '' # Path to your `.ged` file
-gedcom = Gedcom(file_path, False) # Disable strict parsing
+
+gedcom_parser = Parser()
+gedcom_parser.parse_file(file_path, False) # Disable strict parsing
 ```
 
 Disabling strict parsing will allow the parser to gracefully handle the following quirks:
 
-- Multi-line fields that don't use CONC or CONT
-- Handle the last line not ending in a CRLF
-
-### Iterate through all records, search last names and print matches
-
-```python
-all_records = gedcom.get_root_child_elements()
-for record in all_records:
-    if record.is_individual():
-        if record.surname_match('Brodie'):
-            (first, last) = record.get_name()
-            print(first + " " + last)
-```
+- Multi-line fields that don't use `CONC` or `CONT`
+- Handle the last line not ending in a CRLF (`\r\n`)
 
 ## Reference
 
-The `Element` class contains all the information for a single record in the GEDCOM file, for example and individual.
+> **Note**: At a later state the documentation may be outsourced into individual, automatically generated wiki pages.
+> (Makes things a little bit easier.)
 
-### `Element` methods
+### `Parser` class
+
+The `Parser` class represents the actual parser. Use this class to parse a GEDCOM file.
+
+> **Note**: May be imported via `from gedcom.parser import Parser`.
 
 Method | Parameters | Returns | Description
 -------|------------|---------|------------
-`get_child_elements`   | none          | List of Element | Returns all the child elements of this record
-`get_parent_element`   | none          | Element | Returns parent Element
-`new_child_element`    | String tag, String pointer, String value | Element | Create a new Element
-`add_child_element`    | Element child | Element | Adds the child record
-`set_parent_element`   | Element parent| none | Not normally required to be called (add_child_element calls this automatically
-`is_individual`        | none          | Boolean | Returns True if the record is that of a person
-`is_family`            | none          | Boolean | Returns True if thet record of a family.  Family records can be passed to get_family_members()
-`is_file`              | none          | Boolean | Returns True if the record is a pointer to an external file
-`is_object`            | none          | Boolean | Returns True if the record is an object (for example multi-media) stored inside the gedcom
-`is_private`           | none          | Boolean | Returns True if the record is marked Private
-`is_deceased`          | none          | Boolean | Returns True if the individual is marked deceased
-`is_child`             | none          | Boolean | Returns True if the individual is a child
-`criteria_match`       | colon separated string "surname=[name]:name=[name]:birth][year]:birth_range=[year-to-year]:death=[year]:death_range[year-to-year]"| Boolean | Returns True if the criteria matches
-`surname_match`        | String | Boolean | Returns True if the case insensitive substring matches the supplied string
-`given_match`          | String | Boolean | Returns True if the case insensitive substring matches the supplied string
-`death_range_match`    | Int from, Int to | Boolean | Returns True if Death Year is in the supplied range
-`death_year_match`     | Int | Boolean | Returns True if Death Year equals parameter
-`birth_range_match`    | Int from, Int to | Boolean | Returns True if Birth Year is in the supplied range
-`birth_year_match`     | Int | Boolean | Returns True if Birth Year equals parameter
-`get_name`             | none | (String given, String surname) | Returns the Given name(s) and Surname in a tuple
-`get_gender`           | none | String | Returns individual's gender
-`get_birth_data`       | none | (String date, String place, Array sources) | Returns a tuple of the birth data
-`get_birth_year`       | none | Int | Returns the Birth Year
-`get_death_data`       | none | (String date, String place, Array sources) | Returns a tuple of the death data
-`get_death_year`       | none | Int | Returns the Death Year
-`get_burial`           | none | (String date, String place, Array sources) | Returns a tuple of the burial data
-`get_census`           | none | List [String date, String place, Array sources] | Returns a List of tuple of the census data
-`get_last_change_date` | none | String | Returns the date of the last update to this individual
-`get_occupation`       | none | String | Returns the individual's occupation
-`get_individual`       | none | Individual | Returns the individual
+`invalidate_cache` | | | Empties the element list and dictionary to cause `get_element_list()` and `get_element_dictionary()` to return updated data
+`get_element_list` | | `list` of `Element` | Returns a list containing all elements from within the GEDCOM file
+`get_element_dictionary` | | `dict` of `Element` | Returns a dictionary containing all elements, identified by a pointer, from within the GEDCOM file
+`get_root_element` | | `RootElement` | Returns a virtual root element containing all logical records as children
+`get_root_child_elements` | | `list` of `Element` | Returns a list of logical records in the GEDCOM file
+`parse_file` | `str` file_path, `bool` strict | | Opens and parses a file, from the given file path, as GEDCOM 5.5 formatted data
+`get_marriages` | `IndividualElement` individual | `tuple`: (`str` date, `str` place) | Returns a list of marriages of an individual formatted as a tuple (`str` date, `str` place)
+`get_marriage_years` | `IndividualElement` individual | `list` of `int` | Returns a list of marriage years (as integers) for an individual
+`marriage_year_match` | `IndividualElement` individual, `int` year | `bool` | Checks if one of the marriage years of an individual matches the supplied year. Year is an integer.
+`marriage_range_match` | `IndividualElement` individual, `int` from_year, `int` to_year | `bool` | Check if one of the marriage years of an individual is in a given range. Years are integers.
+`get_families` | `IndividualElement` individual, `str` family_type = `gedcom.tags.GEDCOM_TAG_FAMILY_SPOUSE` | `list` of `FamilyElement` | Return family elements listed for an individual
+`get_ancestors` | `IndividualElement` individual, `str` ancestor_type = `"ALL"` | `list` of `Element` | Return elements corresponding to ancestors of an individual
+`get_parents` | `IndividualElement` individual, `str` parent_type = `"ALL"` | `list` of `IndividualElement` | Return elements corresponding to parents of an individual
+`find_path_to_ancestor` | `IndividualElement` descendant, `IndividualElement` ancestor, `path` = `None` | `object` | Return path from descendant to ancestor
+`get_family_members` | `FamilyElement` family, `str` members_type = `FAMILY_MEMBERS_TYPE_ALL` | `list` of `IndividualElement` | Return array of family members: individual, spouse, and children
+`print_gedcom` | | | Write GEDCOM data to stdout
+`save_gedcom` | `IO` open_file | | Save GEDCOM data to a file
 
-### `Gedcom` method
+### `Element` class
 
-Method | Parameters | Returns | Description 
+An element represents a line from within the parsed GEDCOM file.
+
+May be imported via `from gedcom.element.element import Element`.
+
+Method | Parameters | Returns | Description
 -------|------------|---------|------------
-`get_root_element`        | none | Element root | Returns the virtual "root" individual
-`get_root_child_elements` | none | List of Element | Returns a List of all Elements
-`get_element_dictionary`  | none | Dict of Element | Returns a Dict of all Elements
-`get_element_list`        | none | List of Element | Returns a List of all Elements
-`get_marriages`           | Element individual | List of Marriage ("Date", "Place") | Returns List of Tuples of Marriage data (Date and Place)
-`find_path_to_ancestors`  | Element descendant, Element ancestor| List of Element| Returns list of individuals from the descendant Element to the ancestor Element.  Returns None if there is no direct path
-`get_family_members`      | Element family, optional String members_type - one of "ALL" (default), "PARENTS", "HUSB", "WIFE", "CHIL" | List of Element individuals | Returns a list of individuals for the supplied family record, filtered by the members_type
-`get_parents`             | Element individual, optional String parent_type - one of "ALL" (default) or "NAT" | List of Element individuals | Returns the individual's parents as a List
-`get_ancestors`           | Element individual, optional String ancestor_type - one of "All" (default) or "NAT" | List of Element individuals | Recursively retrieves all the parents starting with the supplied individual
-`get_families`            | Element individual optional String family_type - one of "FAMS" (default), "FAMC"|List of Family records | Family Records can be used in get_family_members()
-`marriage_range_match`    | Element individual, Int from, Int to| Boolean | Check if individual is married within the specified range
-`marriage_year_match`     | Element individual, Int year| Boolean | Check if individual is married in the year specified
-`get_marriage_years`      | Element individual |List of Int| Returns Marriage event years
-`print_gedcom`            | none | none | Prints the gedcom to STDOUT
-`save_gedcom`             | String filename | none | Writes gedcom to specified filename
+`get_level` | | `int` | Returns the level of this element from within the GEDCOM file
+`get_pointer` | | `str` | Returns the pointer of this element from within the GEDCOM file
+`get_tag` | | `str` | Returns the tag of this element from within the GEDCOM file
+`get_value` | | `str` | Returns the tag of this element from within the GEDCOM file
+`set_value` | `str` value  | `str` | Sets the value of this element
+`get_multi_line_value` | | `str` | Returns the value of this element including concatenations or continuations
+`set_multi_line_value` | `str` value | `str` | Sets the value of this element, adding concatenation and continuation lines when necessary
+`get_child_elements` | | `list` of `Element` | Returns the direct child elements of this element
+`new_child_element` | `str` tag, `str` pointer = `""`, `str` value = `""` | `Element` | Creates and returns a new child element of this element
+`add_child_element` | `Element` child | `Element` | Adds a child element to this element
+`get_parent_element` | | `Element` | Returns the parent element of this element
+`set_parent_element` | `Element` parent | | Adds a parent element to this element. There's usually no need to call this method manually, `add_child_element()` calls it automatically.
+`get_individual` | | `str` | **DEPRECATED**: As of version `v1.0.0` use `to_gedcom_string()` method instead.
+`to_gedcom_string` | `bool` recursive = `False` | `str` | Formats this element and optionally all of its sub-elements into a GEDCOM conform string
+
+> Casting an `Element` to a string will internally call the `to_gedcom_string()` method.
+
+#### `FamilyElement` class (derived from `Element`)
+
+May be imported via `from gedcom.element.family import FamilyElement`.
+
+Method | Parameters | Returns | Description
+-------|------------|---------|------------
+`is_family` | | `bool` | Checks if this element is an actual family
+
+#### `FileElement` class (derived from `Element`)
+
+May be imported via `from gedcom.element.file import FileElement`.
+
+Method | Parameters | Returns | Description
+-------|------------|---------|------------
+`is_file` | | `bool` | Checks if this element is an actual file
+
+#### `IndividualElement` class (derived from `Element`)
+
+Represents a person from within the parsed GEDCOM file.
+
+May be imported via `from gedcom.element.individual import IndividualElement`.
+
+Method | Parameters | Returns | Description
+-------|------------|---------|------------
+`is_individual` | | `bool` | Checks if this element is an actual individual
+`is_deceased` | | `bool` | Checks if this individual is deceased
+`is_child` | | `bool` | Checks if this element is a child of a family
+`is_private` | | `bool` | Checks if this individual is marked private
+`get_name` | | `tuple`: (`str` given_name, `str` surname) | Returns an individual's names as a tuple: (`str` given_name, `str` surname)
+`surname_match` | `str` surname_to_match | `bool` | Matches a string with the surname of an individual
+`given_name_match` | `str` given_name_to_match | `bool` | Matches a string with the given names of an individual
+`get_gender` | | `str` | Returns the gender of a person in string format
+`get_birth_data` | | `tuple`: (`str` date, `str` place, `list` sources) | Returns the birth data of a person formatted as a tuple: (`str` date, `str` place, `list` sources)
+`get_birth_year` | | `int` | Returns the birth year of a person in integer format
+`get_death_data` | | `tuple`: (`str` date, `str` place, `list` sources) | Returns the death data of a person formatted as a tuple: (`str` date, `str` place, `list` sources)
+`get_death_year` | | `int` | Returns the death year of a person in integer format
+`get_burial_data` | | `tuple`: (`str` date, `str` place, `list` sources) | Returns the burial data of a person formatted as a tuple: (`str` date, `str´ place, `list` sources)
+`get_census_data` | | `list` of `tuple`: (`str` date, `str` place, `list` sources) | Returns a list of censuses of an individual formatted as tuples: (`str` date, `str´ place, `list` sources)
+`get_last_change_date` | | `str` | Returns the date of when the person data was last changed formatted as a string
+`get_occupation` | | `str` | Returns the occupation of a person
+`birth_year_match` | `int` year | `bool` | Returns `True` if the given year matches the birth year of this person
+`birth_range_match` | `int` from_year, `int` to_year | `bool` | Checks if the birth year of an individual lies within the given range
+`death_year_match` | `int` year | `bool` | Returns `True` if the given year matches the death year of this person
+`death_range_match` | `int` from_year, `int` to_year | `bool` | Returns `True` if the given year matches the death year of this person
+`criteria_match` | `str` criteria | `bool` | Checks if this individual matches all of the given criteria. Full format for `criteria`: `surname=[name]:given_name=[given_name]:birth[year]:birth_range=[from_year-to_year]`
+
+#### `ObjectElement` class (derived from `Element`)
+
+May be imported via `from gedcom.element.object import ObjectElement`.
+
+Method | Parameters | Returns | Description
+-------|------------|---------|------------
+`is_object` | | `bool` | Checks if this element is an actual object
+
+#### `RootElement` class (derived from `Element`)
+
+Virtual GEDCOM root element containing all logical records as children.
 
 ## Local development
 
@@ -129,10 +203,10 @@ I suggest using [pyenv](https://github.com/pyenv/pyenv) for local development.
 ### Running tests
 
 1. Run `pip<version> install --no-cache-dir -r requirements.txt` to install dependencies
-1. Run tests with [tox](https://tox.readthedocs.io/en/latest/index.html)
+1. Run tests with [tox](https://tox.readthedocs.io/en/latest/index.html) (`tox` in your console)
     * For Python 2.7 run `tox -e py27` (you need to have Python 2.7 installed)
-    * For Python 3.4 run `tox -e py34` (you need to have Python 3.6 installed)
-    * For Python 3.5 run `tox -e py35` (you need to have Python 3.6 installed)
+    * For Python 3.4 run `tox -e py34` (you need to have Python 3.4 installed)
+    * For Python 3.5 run `tox -e py35` (you need to have Python 3.5 installed)
     * For Python 3.6 run `tox -e py36` (you need to have Python 3.6 installed)
 
 ### Uploading a new package to PyPI
@@ -144,6 +218,10 @@ I suggest using [pyenv](https://github.com/pyenv/pyenv) for local development.
 > When the package is ready to be published to the real Python Package Index
 the `repository-url` is `https://upload.pypi.org/legacy/`.
 
+## Changelog
+
+Please have a look at the [`CHANGELOG.md`](CHANGELOG.md) file.
+
 ## History
 
 This module was originally based on a GEDCOM parser written by 
@@ -151,51 +229,8 @@ Daniel Zappala at Brigham Young University (Copyright (C) 2005) which
 was licensed under the GPL v2 and then continued by
 [Mad Price Ball](https://github.com/madprime) in 2012.
 
-Further updates by [Nicklas Reincke](https://github.com/nickreynke) and [Damon Brodie](https://github.com/nomadyow) in 2018.
-
-## Changelog
-
-**v0.2.5dev**
-
-- Updated project structure ([#18](https://github.com/nickreynke/python-gedcom/issues/18))
-- Fixed `setup.py` outputting correct markdown when reading the `README.md` ([#16](https://github.com/nickreynke/python-gedcom/issues/16))
-- Applied Flake8 code style and **added explicit error handling**
-- Set up test suite
-
-**v0.2.4dev**
-
-- Made `surname_match` and `given_match` case insensitive ([#10](https://github.com/nickreynke/python-gedcom/issues/10))
-- Added new `is_child` method ([#10](https://github.com/nickreynke/python-gedcom/issues/10))
-
-**v0.2.3dev**
-
-- Assemble marriages properly ([#9](https://github.com/nickreynke/python-gedcom/issues/9))
-- Return the top NAME record instead of the last one ([#9](https://github.com/nickreynke/python-gedcom/issues/9))
-
-**v0.2.2dev**
-
-- Support BOM control characters ([#5](https://github.com/nickreynke/python-gedcom/issues/5))
-- Support the last line not having a CR and/or LF
-- Support incorrect line splitting generated by Ancestry.  Insert CONT/CONC tag as necessary ([#6](https://github.com/nickreynke/python-gedcom/issues/6))
-
-**v0.2.1dev**
-
-- Changed broken links to GEDCOM format specification ([#2](https://github.com/nickreynke/python-gedcom/issues/2))
-
-**v0.2.0dev**
-
-- Added `develop` branch to track and update current development process
-- Applied PEP 8 Style Guide conventions
-- **Renamed variables and methods** to make their purpose more clear
-- **Outsourced GEDCOM tags to module level**
-- **Added missing inline documentation**
-- Optimized `README.md` (sections and better description)
-- Added `LICENSE` file
-- Cleaned up and optimized code
-
-**v0.1.1dev**
-
-- initial release; [forked](https://github.com/madprime/python-gedcom)
+The project was taken over by [Nicklas Reincke](https://github.com/nickreynke) in 2018.
+Together with [Damon Brodie](https://github.com/nomadyow) a lot of changes were made and the parser was optimized.
 
 ## License
 
@@ -203,7 +238,7 @@ Licensed under the [GNU General Public License v2](http://www.gnu.org/licenses/g
 
 **Python GEDCOM Parser**
 <br>Copyright (C) 2018 Damon Brodie (damon.brodie at gmail.com)
-<br>Copyright (C) 2018 Nicklas Reincke (contact at reynke.com)
+<br>Copyright (C) 2018-2019 Nicklas Reincke (contact at reynke.com)
 <br>Copyright (C) 2016 Andreas Oberritter
 <br>Copyright (C) 2012 Madeleine Price Ball
 <br>Copyright (C) 2005 Daniel Zappala (zappala at cs.byu.edu)

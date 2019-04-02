@@ -10,7 +10,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='python-gedcom',
-    version='0.2.5dev',
+    version='1.0.0',
     description='A Python module for parsing, analyzing, and manipulating GEDCOM files.',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -19,7 +19,7 @@ setup(
     author_email='contact@reynke.com',
     license='GPLv2',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Topic :: Sociology :: Genealogy',
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',

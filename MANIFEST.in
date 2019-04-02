@@ -1,4 +1,4 @@
-# Include the README
+# Include the README and the CHANGELOG
 include *.md
 
 # Include the license file
@@ -6,3 +6,6 @@ include LICENSE.txt
 
 # Include the `requirements.txt` file
 include requirements.txt
+
+# Include GEDCOM test files
+include tests/files/*.ged
