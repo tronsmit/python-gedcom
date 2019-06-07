@@ -26,10 +26,10 @@
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
 __all__ = [
-    # Subpackages
     "element",
-    # Modules
-    "helpers",
-    "parser",
-    "tags"
+    "family",
+    "file",
+    "individual",
+    "object",
+    "root"
 ]
