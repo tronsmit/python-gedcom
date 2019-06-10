@@ -291,7 +291,7 @@ class Element(object):
         if recursive:
             for child_element in self.get_child_elements():
                 result += child_element.to_gedcom_string(True)
-                
+
         return result
 
     def __str__(self):
