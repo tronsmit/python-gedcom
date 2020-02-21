@@ -190,7 +190,7 @@ class Parser(object):
 
         if regex_match is None:
             if strict:
-                error_message = ("Line <%d:%s> of document violates GEDCOM format 5.5" % (line_number,line)
+                error_message = ("Line <%d:%s> of document violates GEDCOM format 5.5" % (line_number, line)
                                  + "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
                 raise GedcomFormatViolationError(error_message)
             else:
