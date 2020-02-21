@@ -133,6 +133,9 @@ class IndividualElement(Element):
         # If we reach here we are probably returning empty strings
         return given_name, surname
 
+    def get_all_names(self):
+        return [a.get_value() for a in self.get_child_elements() if a.get_tag() == gedcom.tags.GEDCOM_TAG_NAME]
+
     def surname_match(self, surname_to_match):
         """Matches a string with the surname of an individual
         :type surname_to_match: str
