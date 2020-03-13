@@ -134,14 +134,21 @@ class Parser(object):
         :type file_path: str
         :type strict: bool
         """
+        with open(file_path, 'rb') as gedcom_stream:
+            self.parse(gedcom_stream, strict)
+
+    def parse(self, gedcom_stream, strict=True):
+        """Parses a stream, or an array of lines, as GEDCOM 5.5 formatted data
+        :type gedcom_stream: a file stream, or str array of lines with new line at the end
+        :type strict: bool
+        """
         self.invalidate_cache()
         self.__root_element = RootElement()
 
-        gedcom_file = open(file_path, 'rb')
         line_number = 1
         last_element = self.get_root_element()
 
-        for line in gedcom_file:
+        for line in gedcom_stream:
             last_element = self.__parse_line(line_number, line.decode('utf-8-sig'), last_element, strict)
             line_number += 1
 
@@ -183,7 +190,7 @@ class Parser(object):
 
         if regex_match is None:
             if strict:
-                error_message = ("Line %d of document violates GEDCOM format 5.5" % line_number
+                error_message = ("Line <%d:%s> of document violates GEDCOM format 5.5" % (line_number, line)
                                  + "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
                 raise GedcomFormatViolationError(error_message)
             else:
