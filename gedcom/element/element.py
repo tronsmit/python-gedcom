@@ -272,8 +272,6 @@ class Element(object):
         :type recursive: bool
         :rtype: str
         """
-        if self.get_level() < 0:
-            return ''
 
         result = str(self.get_level())
 
@@ -287,9 +285,12 @@ class Element(object):
 
         result += self.__crlf
 
+        if self.get_level() < 0:
+            result = ''
+
         if recursive:
             for child_element in self.get_child_elements():
-                result += child_element.to_gedcom_string()
+                result += child_element.to_gedcom_string(True)
 
         return result
 
