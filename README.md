@@ -17,7 +17,7 @@ the GEDCOM 5.5 format which is detailed [here](https://chronoplexsoftware.com/ge
 
 ## Installation
 
-The module can be installed via [pip](https://pip.pypa.io/).
+The module can be installed via [pipenv](https://github.com/pypa/pipenv) or simply [pip](https://pip.pypa.io/).
 
 Run `pip<version> install python-gedcom` to install or `pip<version> install python-gedcom --upgrade`
 to upgrade to the newest version uploaded to the [PyPI repository](https://pypi.org/project/python-gedcom/).
