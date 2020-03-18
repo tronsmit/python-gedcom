@@ -4,8 +4,9 @@ include *.md
 # Include the license file
 include LICENSE.txt
 
-# Include the `requirements.txt` file
-include requirements.txt
+# Include the dependency related files
+include Pipfile
+include Pipfile.lock
 
 # Include GEDCOM test files
 include tests/files/*.ged

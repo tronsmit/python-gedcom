@@ -4,7 +4,7 @@
 [![GitHub release](https://img.shields.io/github/release/nickreynke/python-gedcom.svg)](https://github.com/nickreynke/python-gedcom/releases)
 [![Build Status](https://travis-ci.org/nickreynke/python-gedcom.svg?branch=master)](https://travis-ci.org/nickreynke/python-gedcom)
 ![](https://img.shields.io/badge/GEDCOM%20format%20version-5.5-yellowgreen.svg)
-![](https://img.shields.io/badge/Python%20versions-2.7%20and%203.7-yellowgreen.svg)
+![](https://img.shields.io/badge/Python%20versions-3.5%20to%203.8-yellowgreen.svg)
 
 A Python module for parsing, analyzing, and manipulating GEDCOM files.
 
@@ -17,13 +17,19 @@ the GEDCOM 5.5 format which is detailed [here](https://chronoplexsoftware.com/ge
 
 ## Installation
 
-The module can be installed via [pip](https://pip.pypa.io/).
+The module can be installed via [pipenv](https://github.com/pypa/pipenv) or simply [pip](https://pip.pypa.io/).
 
 Run `pip<version> install python-gedcom` to install or `pip<version> install python-gedcom --upgrade`
 to upgrade to the newest version uploaded to the [PyPI repository](https://pypi.org/project/python-gedcom/).
 
 If you want to use the latest pre-release of the `python-gedcom` package,
 simply append the `--pre` option to `pip`: `pip<version> install python-gedcom --pre`
+
+> Tip: Using [pipenv](https://github.com/pypa/pipenv) simplifies the installation and maintenance of dependencies.
+
+## Changelog
+
+Please have a look at the [`CHANGELOG.md`](CHANGELOG.md) file.
 
 ## Example usage
 
@@ -198,29 +204,28 @@ Virtual GEDCOM root element containing all logical records as children.
 
 ## Local development
 
-I suggest using [pyenv](https://github.com/pyenv/pyenv) for local development.
+Local development is done using [pyenv](https://github.com/pyenv/pyenv) and
+[pipenv](https://github.com/pypa/pipenv).
 
 ### Running tests
 
-1. Run `pip<version> install --no-cache-dir -r requirements.txt` to install dependencies
-1. Run tests with [tox](https://tox.readthedocs.io/en/latest/index.html) (`tox` in your console)
-    * For Python 2.7 run `tox -e py27` (you need to have Python 2.7 installed)
-    * For Python 3.4 run `tox -e py34` (you need to have Python 3.4 installed)
-    * For Python 3.5 run `tox -e py35` (you need to have Python 3.5 installed)
-    * For Python 3.6 run `tox -e py36` (you need to have Python 3.6 installed)
+1. Run `pipenv install` to install dependencies
+1. Run tests with [tox](https://tox.readthedocs.io/en/latest/index.html) (`pipenv run tox` in your console)
+    * For Python 3.5 run `pipenv run tox -e py35` (you need to have Python 3.5 installed)
+    * For Python 3.6 run `pipenv run tox -e py36` (you need to have Python 3.6 installed)
+    * For Python 3.7 run `pipenv run tox -e py37` (you need to have Python 3.7 installed)
+    * For Python 3.8 run `pipenv run tox -e py38` (you need to have Python 3.8 installed)
 
 ### Uploading a new package to PyPI
 
-1. Run `pip<version> install --no-cache-dir -r requirements.txt` to install dependencies
-1. Run `python<version> setup.py sdist bdist_wheel` to generate distribution archives
-1. Run `twine upload --repository-url https://test.pypi.org/legacy/ dist/*` to upload the archives to the Test Python Package Index repository
+1. Run `pipenv install` to install dependencies
+1. Run `pipenv run python3 setup.py sdist bdist_wheel` to generate distribution archives
+1. Run `pipenv run twine upload --repository-url https://test.pypi.org/legacy/ dist/*` to upload the archives to the Test Python Package Index repository
 
 > When the package is ready to be published to the real Python Package Index
 the `repository-url` is `https://upload.pypi.org/legacy/`.
-
-## Changelog
-
-Please have a look at the [`CHANGELOG.md`](CHANGELOG.md) file.
+>
+> `pipenv run twine upload --repository-url https://upload.pypi.org/legacy/ dist/*`
 
 ## History
 
