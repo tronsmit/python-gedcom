@@ -4,7 +4,7 @@
 [![GitHub release](https://img.shields.io/github/release/nickreynke/python-gedcom.svg)](https://github.com/nickreynke/python-gedcom/releases)
 [![Build Status](https://travis-ci.org/nickreynke/python-gedcom.svg?branch=master)](https://travis-ci.org/nickreynke/python-gedcom)
 ![](https://img.shields.io/badge/GEDCOM%20format%20version-5.5-yellowgreen.svg)
-![](https://img.shields.io/badge/Python%20versions-2.7%20and%203.7-yellowgreen.svg)
+![](https://img.shields.io/badge/Python%20versions-3.5%20to%203.8-yellowgreen.svg)
 
 A Python module for parsing, analyzing, and manipulating GEDCOM files.
 
