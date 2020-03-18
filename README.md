@@ -25,6 +25,12 @@ to upgrade to the newest version uploaded to the [PyPI repository](https://pypi.
 If you want to use the latest pre-release of the `python-gedcom` package,
 simply append the `--pre` option to `pip`: `pip<version> install python-gedcom --pre`
 
+> Tip: Using [pipenv](https://github.com/pypa/pipenv) simplifies the installation and maintenance of dependencies.
+
+## Changelog
+
+Please have a look at the [`CHANGELOG.md`](CHANGELOG.md) file.
+
 ## Example usage
 
 > **For more examples:**
@@ -198,29 +204,28 @@ Virtual GEDCOM root element containing all logical records as children.
 
 ## Local development
 
-I suggest using [pyenv](https://github.com/pyenv/pyenv) for local development.
+Local development is done using [pyenv](https://github.com/pyenv/pyenv) and
+[pipenv](https://github.com/pypa/pipenv).
 
 ### Running tests
 
-1. Run `pip<version> install --no-cache-dir -r requirements.txt` to install dependencies
-1. Run tests with [tox](https://tox.readthedocs.io/en/latest/index.html) (`tox` in your console)
-    * For Python 2.7 run `tox -e py27` (you need to have Python 2.7 installed)
-    * For Python 3.4 run `tox -e py34` (you need to have Python 3.4 installed)
-    * For Python 3.5 run `tox -e py35` (you need to have Python 3.5 installed)
-    * For Python 3.6 run `tox -e py36` (you need to have Python 3.6 installed)
+1. Run `pipenv install` to install dependencies
+1. Run tests with [tox](https://tox.readthedocs.io/en/latest/index.html) (`pipenv run tox` in your console)
+    * For Python 3.5 run `pipenv run tox -e py35` (you need to have Python 3.5 installed)
+    * For Python 3.6 run `pipenv run tox -e py36` (you need to have Python 3.6 installed)
+    * For Python 3.7 run `pipenv run tox -e py37` (you need to have Python 3.7 installed)
+    * For Python 3.8 run `pipenv run tox -e py38` (you need to have Python 3.8 installed)
 
 ### Uploading a new package to PyPI
 
-1. Run `pip<version> install --no-cache-dir -r requirements.txt` to install dependencies
-1. Run `python<version> setup.py sdist bdist_wheel` to generate distribution archives
-1. Run `twine upload --repository-url https://test.pypi.org/legacy/ dist/*` to upload the archives to the Test Python Package Index repository
+1. Run `pipenv install` to install dependencies
+1. Run `pipenv run python3 setup.py sdist bdist_wheel` to generate distribution archives
+1. Run `pipenv run twine upload --repository-url https://test.pypi.org/legacy/ dist/*` to upload the archives to the Test Python Package Index repository
 
 > When the package is ready to be published to the real Python Package Index
 the `repository-url` is `https://upload.pypi.org/legacy/`.
-
-## Changelog
-
-Please have a look at the [`CHANGELOG.md`](CHANGELOG.md) file.
+>
+> `pipenv run twine upload --repository-url https://upload.pypi.org/legacy/ dist/*`
 
 ## History
 
