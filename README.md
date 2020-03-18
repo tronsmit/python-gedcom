@@ -205,7 +205,7 @@ Virtual GEDCOM root element containing all logical records as children.
 ## Local development
 
 Local development is done using [pyenv](https://github.com/pyenv/pyenv) and
-[pipenv](https://github.com/pypa/pipenv).
+[pipenv](https://github.com/pypa/pipenv) using Python 3.8.
 
 ### Running tests
 
