@@ -2,16 +2,22 @@
   <img src="logo.png">
 </p>
 
-[![PyPI](https://img.shields.io/pypi/v/python-gedcom.svg)](https://pypi.org/project/python-gedcom/)
-[![GitHub release](https://img.shields.io/github/release/nickreynke/python-gedcom.svg)](https://github.com/nickreynke/python-gedcom/releases)
-[![Build Status](https://travis-ci.org/nickreynke/python-gedcom.svg?branch=master)](https://travis-ci.org/nickreynke/python-gedcom)
-![](https://img.shields.io/badge/GEDCOM%20format%20version-5.5-yellowgreen.svg)
-![](https://img.shields.io/badge/Python%20versions-3.5%20to%203.8-yellowgreen.svg)
+<p align="center">
+    <a href="https://pypi.org/project/python-gedcom/" target="_blank"><img src="https://img.shields.io/pypi/v/python-gedcom.svg" alt="PyPI"></a>
+    <a href="https://github.com/nickreynke/python-gedcom/releases" target="_blank"><img src="https://img.shields.io/github/release/nickreynke/python-gedcom.svg" alt="GitHub release"></a>
+    <a href="https://travis-ci.org/nickreynke/python-gedcom" target="_blank"><img src="https://travis-ci.org/nickreynke/python-gedcom.svg?branch=master" alt="Build Status"></a>
+    <img src="https://img.shields.io/badge/GEDCOM%20format%20version-5.5-yellowgreen.svg" alt="GEDCOM format version 5.5">
+    <img src="https://img.shields.io/badge/Python%20versions-3.5%20to%203.8-yellowgreen.svg" alt="Python versions 3.5 to 3.8">
+</p>
 
-A Python module for parsing, analyzing, and manipulating GEDCOM files.
+<p align="center">
+    A Python module for parsing, analyzing, and manipulating GEDCOM files.
+</p>
 
-GEDCOM files contain ancestry data. The parser is currently supporting
-the GEDCOM 5.5 format which is detailed [here](https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf).
+<p align="center">
+    GEDCOM files contain ancestry data. The parser is currently supporting the GEDCOM 5.5 format which is detailed
+    <a href="https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf" target="_blank">here</a>.
+</p>
 
 > For the latest changes please have a look at the [`CHANGELOG.md`](CHANGELOG.md) file.
 >
