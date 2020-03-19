@@ -1,4 +1,6 @@
-# Python GEDCOM Parser
+<p align="center">
+  <img src="logo.png">
+</p>
 
 [![PyPI](https://img.shields.io/pypi/v/python-gedcom.svg)](https://pypi.org/project/python-gedcom/)
 [![GitHub release](https://img.shields.io/github/release/nickreynke/python-gedcom.svg)](https://github.com/nickreynke/python-gedcom/releases)
