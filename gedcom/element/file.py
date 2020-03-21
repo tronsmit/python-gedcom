@@ -37,8 +37,5 @@ class NotAnActualFileError(Exception):
 
 class FileElement(Element):
 
-    def is_file(self):
-        """Checks if this element is an actual file
-        :rtype: bool
-        """
-        return self.get_tag() == gedcom.tags.GEDCOM_TAG_FILE
+    def get_tag(self):
+        return gedcom.tags.GEDCOM_TAG_FILE
