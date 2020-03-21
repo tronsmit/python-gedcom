@@ -25,6 +25,8 @@
 #
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
+"""GEDCOM element consisting of tag `gedcom.tags.GEDCOM_TAG_INDIVIDUAL`"""
+
 import re as regex
 from gedcom.element.element import Element
 from gedcom.helpers import deprecated

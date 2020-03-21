@@ -25,6 +25,11 @@
 #
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
+"""
+Module containing the actual `gedcom.parser.Parser` used to generate elements - out of each line -
+which can in return be manipulated.
+"""
+
 import re as regex
 from sys import version_info
 from gedcom.element.element import Element

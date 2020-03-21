@@ -25,6 +25,10 @@
 #
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
+"""
+Helper methods.
+"""
+
 import warnings
 import functools
 
