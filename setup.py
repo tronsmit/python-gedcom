@@ -33,7 +33,7 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
     install_requires=[],
     extras_require={
-        'dev': ['setuptools', 'wheel', 'twine'],
+        'dev': ['setuptools', 'wheel', 'twine', 'pdoc3'],
         'test': ['tox'],
     },
     package_data={},
