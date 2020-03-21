@@ -49,24 +49,24 @@ class GedcomFormatViolationError(Exception):
 class Parser(object):
     """Parses and manipulates GEDCOM 5.5 format data
 
-    For documentation of the GEDCOM 5.5 format, see:
-    http://homepages.rootsweb.ancestry.com/~pmcbride/gedcom/55gctoc.htm
+    For documentation of the GEDCOM 5.5 format, see: http://homepages.rootsweb.ancestry.com/~pmcbride/gedcom/55gctoc.htm
 
     This parser reads and parses a GEDCOM file.
+
     Elements may be accessed via:
-      - a list (all elements, default order is same as in file)
-      - a dict (only elements with pointers, which are the keys)
+
+    * a `list` through `gedcom.parser.Parser.get_element_list()`
+    * a `dict` through `gedcom.parser.Parser.get_element_dictionary()`
     """
 
     def __init__(self):
-        """Initialize a GEDCOM data object."""
         self.__element_list = []
         self.__element_dictionary = {}
         self.__root_element = RootElement()
 
     def invalidate_cache(self):
-        """Empties the element list and dictionary to cause
-        `get_element_list()` and `get_element_dictionary()` to return updated data
+        """Empties the element list and dictionary to cause `gedcom.parser.Parser.get_element_list()`
+        and `gedcom.parser.Parser.get_element_dictionary()` to return updated data.
 
         The update gets deferred until each of the methods actually gets called.
         """
@@ -79,10 +79,10 @@ class Parser(object):
         By default elements are in the same order as they appeared in the file.
 
         This list gets generated on-the-fly, but gets cached. If the database
-        was modified, you should call `invalidate_cache()` once to let this
+        was modified, you should call `gedcom.parser.Parser.invalidate_cache()` once to let this
         method return updated data.
 
-        Consider using `get_root_element()` or `get_root_child_elements()` to access
+        Consider using `gedcom.parser.Parser.get_root_element()` or `gedcom.parser.Parser.get_root_child_elements()` to access
         the hierarchical GEDCOM tree, unless you rarely modify the database.
 
         :rtype: list of Element
