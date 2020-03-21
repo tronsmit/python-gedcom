@@ -25,6 +25,12 @@
 #
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
+"""
+A Python module for parsing, analyzing, and manipulating GEDCOM files.
+
+.. include:: ./gedcom.md
+"""
+
 __all__ = [
     # Subpackages
     "element",
