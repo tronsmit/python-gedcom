@@ -25,6 +25,8 @@
 #
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
+"""GEDCOM element consisting of tag `gedcom.tags.GEDCOM_TAG_FILE`"""
+
 from gedcom.element.element import Element
 import gedcom.tags
 
@@ -35,8 +37,5 @@ class NotAnActualFileError(Exception):
 
 class FileElement(Element):
 
-    def is_file(self):
-        """Checks if this element is an actual file
-        :rtype: bool
-        """
-        return self.get_tag() == gedcom.tags.GEDCOM_TAG_FILE
+    def get_tag(self):
+        return gedcom.tags.GEDCOM_TAG_FILE
