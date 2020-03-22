@@ -32,7 +32,7 @@ The current development process can be tracked in the [develop branch](https://g
 ## Local development
 
 Local development is done using [pyenv](https://github.com/pyenv/pyenv) and
-[pipenv](https://github.com/pypa/pipenv) using Python 3.8.
+[pipenv](https://github.com/pypa/pipenv) using Python 3.5.
 
 ### Running tests
 
