@@ -36,7 +36,7 @@ Local development is done using [pyenv](https://github.com/pyenv/pyenv) and
 
 ### Running tests
 
-1. Run `pipenv install` to install dependencies
+1. Run `pipenv install -d` to install normal and dev dependencies
 1. Run tests with [tox](https://tox.readthedocs.io/en/latest/index.html) (`pipenv run tox` in your console)
     * For Python 3.5 run `pipenv run tox -e py35` (you need to have Python 3.5 installed)
     * For Python 3.6 run `pipenv run tox -e py36` (you need to have Python 3.6 installed)
@@ -45,7 +45,7 @@ Local development is done using [pyenv](https://github.com/pyenv/pyenv) and
 
 ### Generating docs
 
-1. Run `pipenv install` to install dependencies
+1. Run `pipenv install -d` to install normal and dev dependencies
 1. Run `pipenv run pdoc3 --html -o docs/ gedcom --force` to generate docs into the `docs/` directory
 
 > To develop docs run `pipenv run pdoc3 --http localhost:8000 gedcom`
@@ -53,7 +53,7 @@ Local development is done using [pyenv](https://github.com/pyenv/pyenv) and
 
 ### Uploading a new package to PyPI
 
-1. Run `pipenv install` to install dependencies
+1. Run `pipenv install -d` to install normal and dev dependencies
 1. Run `pipenv run python3 setup.py sdist bdist_wheel` to generate distribution archives
 1. Run `pipenv run twine upload --repository-url https://test.pypi.org/legacy/ dist/*` to upload the archives to the Test Python Package Index repository
 
