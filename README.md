@@ -21,7 +21,7 @@
 
 ## Documentation
 
-...
+Documentation can be found here: https://nickreynke.github.io/python-gedcom/gedcom/index.html
 
 ## Changelog
 
