@@ -25,6 +25,8 @@
 #
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
+"""GEDCOM element consisting of tag `gedcom.tags.GEDCOM_TAG_INDIVIDUAL`"""
+
 import re as regex
 from gedcom.element.element import Element
 from gedcom.helpers import deprecated
@@ -37,19 +39,13 @@ class NotAnActualIndividualError(Exception):
 
 class IndividualElement(Element):
 
-    def is_individual(self):
-        """Checks if this element is an actual individual
-        :rtype: bool
-        """
-        return self.get_tag() == gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+    def get_tag(self):
+        return gedcom.tags.GEDCOM_TAG_INDIVIDUAL
 
     def is_deceased(self):
         """Checks if this individual is deceased
         :rtype: bool
         """
-        if not self.is_individual():
-            return False
-
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_DEATH:
                 return True
@@ -60,11 +56,6 @@ class IndividualElement(Element):
         """Checks if this element is a child of a family
         :rtype: bool
         """
-        if not self.is_individual():
-            raise NotAnActualIndividualError(
-                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
-            )
-
         found_child = False
 
         for child in self.get_child_elements():
@@ -77,9 +68,6 @@ class IndividualElement(Element):
         """Checks if this individual is marked private
         :rtype: bool
         """
-        if not self.is_individual():
-            return False
-
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_PRIVATE:
                 private = child.get_value()
@@ -94,9 +82,6 @@ class IndividualElement(Element):
         """
         given_name = ""
         surname = ""
-
-        if not self.is_individual():
-            return given_name, surname
 
         # Return the first gedcom.tags.GEDCOM_TAG_NAME that is found.
         # Alternatively as soon as we have both the gedcom.tags.GEDCOM_TAG_GIVEN_NAME and _SURNAME return those.
@@ -133,6 +118,9 @@ class IndividualElement(Element):
         # If we reach here we are probably returning empty strings
         return given_name, surname
 
+    def get_all_names(self):
+        return [a.get_value() for a in self.get_child_elements() if a.get_tag() == gedcom.tags.GEDCOM_TAG_NAME]
+
     def surname_match(self, surname_to_match):
         """Matches a string with the surname of an individual
         :type surname_to_match: str
@@ -164,9 +152,6 @@ class IndividualElement(Element):
         """
         gender = ""
 
-        if not self.is_individual():
-            return gender
-
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_SEX:
                 gender = child.get_value()
@@ -180,9 +165,6 @@ class IndividualElement(Element):
         date = ""
         place = ""
         sources = []
-
-        if not self.is_individual():
-            return date, place, sources
 
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_BIRTH:
@@ -204,9 +186,6 @@ class IndividualElement(Element):
         :rtype: int
         """
         date = ""
-
-        if not self.is_individual():
-            return date
 
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_BIRTH:
@@ -230,9 +209,6 @@ class IndividualElement(Element):
         place = ""
         sources = []
 
-        if not self.is_individual():
-            return date, place
-
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_DEATH:
                 for childOfChild in child.get_child_elements():
@@ -250,9 +226,6 @@ class IndividualElement(Element):
         :rtype: int
         """
         date = ""
-
-        if not self.is_individual():
-            return date
 
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_DEATH:
@@ -284,9 +257,6 @@ class IndividualElement(Element):
         place = ""
         sources = []
 
-        if not self.is_individual():
-            return date, place
-
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_BURIAL:
                 for childOfChild in child.get_child_elements():
@@ -316,11 +286,6 @@ class IndividualElement(Element):
         """
         census = []
 
-        if not self.is_individual():
-            raise NotAnActualIndividualError(
-                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
-            )
-
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_CENSUS:
 
@@ -349,9 +314,6 @@ class IndividualElement(Element):
         """
         date = ""
 
-        if not self.is_individual():
-            return date
-
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_CHANGE:
                 for childOfChild in child.get_child_elements():
@@ -365,9 +327,6 @@ class IndividualElement(Element):
         :rtype: str
         """
         occupation = ""
-
-        if not self.is_individual():
-            return occupation
 
         for child in self.get_child_elements():
             if child.get_tag() == gedcom.tags.GEDCOM_TAG_OCCUPATION:

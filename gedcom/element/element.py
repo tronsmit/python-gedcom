@@ -25,6 +25,10 @@
 #
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
+"""
+Base GEDCOM element
+"""
+
 from sys import version_info
 from gedcom.helpers import deprecated
 import gedcom.tags
@@ -35,41 +39,30 @@ class Element(object):
 
     Each line in a GEDCOM file is an element with the format
 
-    level [pointer] tag [value]
+    `level [pointer] tag [value]`
 
-    where level and tag are required, and pointer and value are
+    where `level` and `tag` are required, and `pointer` and `value` are
     optional.  Elements are arranged hierarchically according to their
     level, and elements with a level of zero are at the top level.
     Elements with a level greater than zero are children of their
     parent.
 
-    A pointer has the format @pname@, where pname is any sequence of
-    characters and numbers.  The pointer identifies the object being
+    A pointer has the format `@pname@`, where `pname` is any sequence of
+    characters and numbers. The pointer identifies the object being
     pointed to, so that any pointer included as the value of any
     element points back to the original object.  For example, an
-    element may have a FAMS tag whose value is @F1@, meaning that this
+    element may have a `FAMS` tag whose value is `@F1@`, meaning that this
     element points to the family record in which the associated person
-    is a spouse.  Likewise, an element with a tag of FAMC has a value
+    is a spouse. Likewise, an element with a tag of `FAMC` has a value
     that points to a family record in which the associated person is a
     child.
 
     See a GEDCOM file for examples of tags and their values.
+
+    Tags available to an element are seen here: `gedcom.tags`
     """
 
     def __init__(self, level, pointer, tag, value, crlf="\n", multi_line=True):
-        """Initialize an element
-
-        You must include a level, a pointer, a tag, and a value.
-        Normally initialized by the GEDCOM parser, not by a user.
-
-        :type level: int
-        :type pointer: str
-        :type tag: str
-        :type value: str
-        :type crlf: str
-        :type multi_line: bool
-        """
-
         # basic element info
         self.__level = level
         self.__pointer = pointer
@@ -272,8 +265,6 @@ class Element(object):
         :type recursive: bool
         :rtype: str
         """
-        if self.get_level() < 0:
-            return ''
 
         result = str(self.get_level())
 
@@ -287,9 +278,12 @@ class Element(object):
 
         result += self.__crlf
 
+        if self.get_level() < 0:
+            result = ''
+
         if recursive:
             for child_element in self.get_child_elements():
-                result += child_element.to_gedcom_string()
+                result += child_element.to_gedcom_string(True)
 
         return result
 

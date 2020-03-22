@@ -25,6 +25,8 @@
 #
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
+"""GEDCOM element consisting of tag `gedcom.tags.GEDCOM_TAG_FAMILY`"""
+
 from gedcom.element.element import Element
 import gedcom.tags
 
@@ -35,8 +37,5 @@ class NotAnActualFamilyError(Exception):
 
 class FamilyElement(Element):
 
-    def is_family(self):
-        """Checks if this element is an actual family
-        :rtype: bool
-        """
-        return self.get_tag() == gedcom.tags.GEDCOM_TAG_FAMILY
+    def get_tag(self):
+        return gedcom.tags.GEDCOM_TAG_FAMILY

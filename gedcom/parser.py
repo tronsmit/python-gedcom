@@ -25,6 +25,11 @@
 #
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
+"""
+Module containing the actual `gedcom.parser.Parser` used to generate elements - out of each line -
+which can in return be manipulated.
+"""
+
 import re as regex
 from sys import version_info
 from gedcom.element.element import Element
@@ -49,24 +54,24 @@ class GedcomFormatViolationError(Exception):
 class Parser(object):
     """Parses and manipulates GEDCOM 5.5 format data
 
-    For documentation of the GEDCOM 5.5 format, see:
-    http://homepages.rootsweb.ancestry.com/~pmcbride/gedcom/55gctoc.htm
+    For documentation of the GEDCOM 5.5 format, see: http://homepages.rootsweb.ancestry.com/~pmcbride/gedcom/55gctoc.htm
 
     This parser reads and parses a GEDCOM file.
+
     Elements may be accessed via:
-      - a list (all elements, default order is same as in file)
-      - a dict (only elements with pointers, which are the keys)
+
+    * a `list` through `gedcom.parser.Parser.get_element_list()`
+    * a `dict` through `gedcom.parser.Parser.get_element_dictionary()`
     """
 
     def __init__(self):
-        """Initialize a GEDCOM data object."""
         self.__element_list = []
         self.__element_dictionary = {}
         self.__root_element = RootElement()
 
     def invalidate_cache(self):
-        """Empties the element list and dictionary to cause
-        `get_element_list()` and `get_element_dictionary()` to return updated data
+        """Empties the element list and dictionary to cause `gedcom.parser.Parser.get_element_list()`
+        and `gedcom.parser.Parser.get_element_dictionary()` to return updated data.
 
         The update gets deferred until each of the methods actually gets called.
         """
@@ -79,10 +84,10 @@ class Parser(object):
         By default elements are in the same order as they appeared in the file.
 
         This list gets generated on-the-fly, but gets cached. If the database
-        was modified, you should call `invalidate_cache()` once to let this
+        was modified, you should call `gedcom.parser.Parser.invalidate_cache()` once to let this
         method return updated data.
 
-        Consider using `get_root_element()` or `get_root_child_elements()` to access
+        Consider using `gedcom.parser.Parser.get_root_element()` or `gedcom.parser.Parser.get_root_child_elements()` to access
         the hierarchical GEDCOM tree, unless you rarely modify the database.
 
         :rtype: list of Element
@@ -134,14 +139,21 @@ class Parser(object):
         :type file_path: str
         :type strict: bool
         """
+        with open(file_path, 'rb') as gedcom_stream:
+            self.parse(gedcom_stream, strict)
+
+    def parse(self, gedcom_stream, strict=True):
+        """Parses a stream, or an array of lines, as GEDCOM 5.5 formatted data
+        :type gedcom_stream: a file stream, or str array of lines with new line at the end
+        :type strict: bool
+        """
         self.invalidate_cache()
         self.__root_element = RootElement()
 
-        gedcom_file = open(file_path, 'rb')
         line_number = 1
         last_element = self.get_root_element()
 
-        for line in gedcom_file:
+        for line in gedcom_stream:
             last_element = self.__parse_line(line_number, line.decode('utf-8-sig'), last_element, strict)
             line_number += 1
 
@@ -183,7 +195,7 @@ class Parser(object):
 
         if regex_match is None:
             if strict:
-                error_message = ("Line %d of document violates GEDCOM format 5.5" % line_number
+                error_message = ("Line <%d:%s> of document violates GEDCOM format 5.5" % (line_number, line)
                                  + "\nSee: https://chronoplexsoftware.com/gedcomvalidator/gedcom/gedcom-5.5.pdf")
                 raise GedcomFormatViolationError(error_message)
             else:

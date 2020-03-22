@@ -25,6 +25,8 @@
 #
 # Further information about the license: http://www.gnu.org/licenses/gpl-2.0.html
 
+"""Virtual GEDCOM root element containing all logical records as children"""
+
 from gedcom.element.element import Element
 
 
