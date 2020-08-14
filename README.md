@@ -29,6 +29,12 @@ For the latest changes please have a look at the [`CHANGELOG.md`](CHANGELOG.md) 
 
 The current development process can be tracked in the [develop branch](https://github.com/nickreynke/python-gedcom/tree/develop).
 
+## Common problems
+
+* When you name your script `gedcom.py`, and import the `gedcom` module from this package, running your script won't
+  work because Python will try to resolve imports like `gedcom.element.individual` from within your `gedcom.py` but
+  not from within the module from this package. Rename your file in this case. ([#26](https://github.com/nickreynke/python-gedcom/issues/26))
+
 ## Local development
 
 Local development is done using [pyenv](https://github.com/pyenv/pyenv) and
