@@ -10,7 +10,7 @@
 
 ## About this Fork
 
-This is a personal fork of [`python-gedcom`](https://github.com/nickreynke/python-gedcom), originally developed by Nicklas Reincke and contributors. My intention is to adapt and extend this library for use in custom GEDCOM-based genealogy applications.
+This is a personal fork of [`python-gedcom`](https://github.com/nickreynke/python-gedcom), by Nicklas Reincke and contributors. My intention is to adapt and extend this library for use in custom GEDCOM-based genealogy applications.
 
 The original README with full documentation and packaging instructions has been archived [here](README.original.md).
 
